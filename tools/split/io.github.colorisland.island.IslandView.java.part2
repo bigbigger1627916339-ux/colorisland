@@ -1,0 +1,535 @@
+            CharSequence text = textView.getText();
+            if (!Intrinsics.areEqual(text != null ? text.toString() : null, islandAction.getTitle())) {
+                textView.setText(islandAction.getTitle());
+            }
+            textView.setOnClickListener(new View.OnClickListener() { // from class: io.github.colorisland.island.IslandView$$ExternalSyntheticLambda2
+                @Override // android.view.View.OnClickListener
+                public final void onClick(View view) {
+                    IslandView.rebuildActions$lambda$19$lambda$18(IslandView.this, islandAction, view);
+                }
+            });
+            i = i2;
+        }
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public static final void rebuildActions$lambda$19$lambda$18(IslandView islandView, IslandAction islandAction, View view) {
+        Listener listener = islandView.listener;
+        if (listener != null) {
+            listener.onAction(islandAction);
+        }
+    }
+
+    private final void refreshExpandedCutoutInset() {
+        int dp = dp(12.0f);
+        if (!IslandConfig.INSTANCE.getAvoidCutout() || this.cutoutBottomPx <= 0) {
+            if (this.expandedRoot.getPaddingTop() != dp) {
+                this.expandedRoot.setPadding(dp(14.0f), dp, dp(14.0f), dp);
+            }
+        } else {
+            int[] iArr = new int[2];
+            getLocationOnScreen(iArr);
+            int coerceIn = RangesKt.coerceIn(this.cutoutBottomPx - iArr[1], 0, dp(60.0f)) + dp(4.0f);
+            if (this.expandedRoot.getPaddingTop() != coerceIn) {
+                this.expandedRoot.setPadding(dp(14.0f), coerceIn, dp(14.0f), dp);
+            }
+        }
+    }
+
+    private final void refreshProgressHitArea() {
+        if (this.expProgressBar.getVisibility() != 0) {
+            this.progressHitTop = 0;
+            this.progressHitBottom = 0;
+            return;
+        }
+        Object parent = this.expProgressBar.getParent();
+        View view = parent instanceof View ? (View) parent : null;
+        int top = view != null ? view.getTop() : 0;
+        this.progressHitTop = this.expProgressBar.getTop() + top;
+        this.progressHitBottom = top + this.expProgressBar.getBottom();
+    }
+
+    private final void resetInteractionState() {
+        this.seeking = false;
+        this.progressHitTop = 0;
+        this.progressHitBottom = 0;
+        animate().scaleX(1.0f).scaleY(1.0f).setDuration(0L).start();
+    }
+
+    public static /* synthetic */ void setExpanded$default(IslandView islandView, boolean z, boolean z2, int i, Object obj) {
+        if ((i & 2) != 0) {
+            z2 = true;
+        }
+        islandView.setExpanded(z, z2);
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public static final void setExpanded$lambda$20(int i, IslandView islandView) {
+        if (i == islandView.layerAnimGeneration) {
+            islandView.compactRoot.setLayerType(0, null);
+            islandView.expandedRoot.setLayerType(0, null);
+        }
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public static final void setExpanded$lambda$21(IslandView islandView) {
+        if (islandView.expanded) {
+            return;
+        }
+        islandView.compactRoot.setVisibility(4);
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public static final void setExpanded$lambda$22(IslandView islandView) {
+        if (islandView.expanded) {
+            islandView.expandedRoot.setVisibility(4);
+        }
+    }
+
+    private final void setProgressFillWidth(int px) {
+        int coerceAtLeast = RangesKt.coerceAtLeast(px, dp(2.0f));
+        ViewGroup.LayoutParams layoutParams = this.expProgressFill.getLayoutParams();
+        if (layoutParams.width == coerceAtLeast && this.expProgressFill.getTranslationX() == 0.0f) {
+            return;
+        }
+        layoutParams.width = coerceAtLeast;
+        this.expProgressFill.setTranslationX(0.0f);
+        this.expProgressFill.requestLayout();
+    }
+
+    private final void startIndeterminate() {
+        if (this.indeterminateRunning) {
+            return;
+        }
+        this.indeterminateRunning = true;
+        this.indeterminatePhase = 0.0f;
+        this.lastIndeterminateFrameMs = 0L;
+        updateIndeterminateFill();
+        removeCallbacks(this.indeterminateRunnable);
+        postOnAnimation(this.indeterminateRunnable);
+    }
+
+    private final void stopIndeterminate() {
+        if (this.indeterminateRunning) {
+            this.indeterminateRunning = false;
+            removeCallbacks(this.indeterminateRunnable);
+        }
+    }
+
+    private final String str(int resId, String fallback) {
+        Object m5221constructorimpl;
+        Context moduleContext = getModuleContext();
+        if (moduleContext == null) {
+            return fallback;
+        }
+        try {
+            IslandView islandView = this;
+            m5221constructorimpl = KResult.success(moduleContext.getString(resId));
+        } catch (Throwable th) {
+            m5221constructorimpl = KResult.success(KResult.createFailure(th));
+        }
+        if (KResult.isFailureimpl(m5221constructorimpl)) {
+            m5221constructorimpl = null;
+        }
+        String str = (String) m5221constructorimpl;
+        return str == null ? fallback : str;
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public final void updateIndeterminateFill() {
+        int i = this.progressBarWidth;
+        if (i <= 0) {
+            return;
+        }
+        int coerceAtLeast = RangesKt.coerceAtLeast(i / 3, dp(6.0f));
+        int i2 = ((int) (this.indeterminatePhase * (i + coerceAtLeast))) - coerceAtLeast;
+        if (coerceAtLeast != this.lastIndeterminateChunk) {
+            this.lastIndeterminateChunk = coerceAtLeast;
+            View view = this.expProgressFill;
+            ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
+            layoutParams.width = coerceAtLeast;
+            view.setLayoutParams(layoutParams);
+        }
+        this.expProgressFill.setTranslationX(i2);
+    }
+
+    private final int withAlpha(int color, float alpha) {
+        return Color.argb((int) (RangesKt.coerceIn(alpha, 0.0f, 1.0f) * 255), Color.red(color), Color.green(color), Color.blue(color));
+    }
+
+    public final void animateIn() {
+        setAlpha(0.0f);
+        setScaleX(0.9f);
+        setScaleY(0.9f);
+        setVisibility(0);
+        setLayerType(2, null);
+        animate().alpha(1.0f).scaleX(1.0f).scaleY(1.0f).setDuration(300L).setInterpolator(new android.view.animation.OvershootInterpolator(1.3f)).setListener(new AnimatorListenerAdapter() { // from class: io.github.colorisland.island.IslandView$animateIn$1
+            @Override // android.animation.AnimatorListenerAdapter, android.animation.Animator.AnimatorListener
+            public void onAnimationEnd(Animator animation) {
+                Intrinsics.checkNotNullParameter(animation, "animation");
+                IslandView.this.setLayerType(0, null);
+            }
+        }).start();
+    }
+
+    public final void animateOut(final Function0<Unit> onEnd) {
+        Intrinsics.checkNotNullParameter(onEnd, "onEnd");
+        stopIndeterminate();
+        setLayerType(2, null);
+        animate().alpha(0.0f).scaleX(0.9f).scaleY(0.9f).setDuration(220L).setInterpolator(new DecelerateInterpolator()).withEndAction(new Runnable() { // from class: io.github.colorisland.island.IslandView$$ExternalSyntheticLambda4
+            @Override // java.lang.Runnable
+            public final void run() {
+                IslandView.animateOut$lambda$23(IslandView.this, onEnd);
+            }
+        }).start();
+    }
+
+    // 基于背景色生成垂直微渐变(顶部提亮10%/底部压暗8%)，增强立体质感；保留 alpha 通道
+    private final int[] bgGradientColors(int base) {
+        return new int[]{lightenColor(base, 0.10f), base, darkenColor(base, 0.08f)};
+    }
+
+    private static int lightenColor(int color, float f) {
+        int a = color & (-16777216);
+        int r = Math.min(255, (int) ((((color >> 16) & 255) * (1.0f + f)) + 0.5f));
+        int g = Math.min(255, (int) ((((color >> 8) & 255) * (1.0f + f)) + 0.5f));
+        int b = Math.min(255, (int) (((color & 255) * (1.0f + f)) + 0.5f));
+        return a | (r << 16) | (g << 8) | b;
+    }
+
+    private static int darkenColor(int color, float f) {
+        int a = color & (-16777216);
+        int r = (int) (((color >> 16) & 255) * (1.0f - f));
+        int g = (int) (((color >> 8) & 255) * (1.0f - f));
+        int b = (int) ((color & 255) * (1.0f - f));
+        return a | (r << 16) | (g << 8) | b;
+    }
+
+    public final void applyColors() {
+        this.bgDrawable.setColors(bgGradientColors(IslandConfig.INSTANCE.getIslandBgColor()));
+        this.bgDrawable.setStroke(dp(1.0f), colorLuma(IslandConfig.INSTANCE.getIslandBgColor()) > 0.5f ? 855638016 : 872415231);
+        this.expProgressFill.setBackgroundColor(IslandConfig.INSTANCE.getIslandAccentColor());
+        this.messageBubbleColor = withAlpha(IslandConfig.INSTANCE.getIslandAccentColor(), 0.16f);
+        invalidate();
+    }
+
+    public final void applyCutoutSpacer() {
+        int computeCompactWidth;
+        int i;
+        ViewGroup.LayoutParams layoutParams = this.cutoutSpacer.getLayoutParams();
+        LinearLayout.LayoutParams layoutParams2 = layoutParams instanceof LinearLayout.LayoutParams ? (LinearLayout.LayoutParams) layoutParams : null;
+        if (layoutParams2 == null) {
+            return;
+        }
+        if (IslandConfig.INSTANCE.getAvoidCutout() && (i = this.cutoutWidthPx) > 0) {
+            int dp = i + dp(16.0f);
+            if (layoutParams2.width != dp || layoutParams2.weight != 0.0f) {
+                layoutParams2.width = dp;
+                layoutParams2.weight = 0.0f;
+                this.cutoutSpacer.setLayoutParams(layoutParams2);
+            }
+        } else if (layoutParams2.width != 0 || layoutParams2.weight != 1.0f) {
+            layoutParams2.width = 0;
+            layoutParams2.weight = 1.0f;
+            this.cutoutSpacer.setLayoutParams(layoutParams2);
+        }
+        refreshExpandedCutoutInset();
+        if (this.expanded || (computeCompactWidth = computeCompactWidth()) == this.compactWidthPx) {
+            return;
+        }
+        this.compactWidthPx = computeCompactWidth;
+        applyCurrentSize(false);
+    }
+
+    public final void bind(IslandNotification n, boolean expand) {
+        String appLabel;
+        Intrinsics.checkNotNullParameter(n, "n");
+        resetInteractionState();
+        this.statusMode = false;
+        this.status = null;
+        this.notif = n;
+        // 不需要开关：compact 态隐藏 toggle，APP 岛与手电筒岛 compact 宽度自然一致
+        this.compactToggle.setVisibility(8);
+        if (this.compactIcon.getDrawable() != n.getAppIcon()) {
+            this.compactIcon.setImageDrawable(n.getAppIcon());
+            popIcon(this.compactIcon);
+        }
+        if (this.expIcon.getDrawable() != n.getAppIcon()) {
+            this.expIcon.setImageDrawable(n.getAppIcon());
+            popIcon(this.expIcon);
+        }
+        boolean z = n.getGroupCount() > 1;
+        TextView textView = this.expAppName;
+        if (z) {
+            String format = String.format(str(R.string.island_group_count, n.getAppLabel() + " · " + n.getGroupCount() + " 条新通知"), Arrays.copyOf(new Object[]{n.getAppLabel(), Integer.valueOf(n.getGroupCount())}, 2));
+            Intrinsics.checkNotNullExpressionValue(format, "format(...)");
+            appLabel = format;
+        } else {
+            appLabel = n.getAppLabel();
+        }
+        textView.setText(appLabel);
+        this.expTitle.setText(n.getTitle());
+        this.expText.setText(n.getText());
+        this.expText.setVisibility(StringsKt.isBlank(n.getText()) ? 8 : 0);
+        this.expSubText.setText(n.getSubText());
+        this.expSubText.setVisibility(StringsKt.isBlank(n.getSubText()) ? 8 : 0);
+        if (!n.getMessages().isEmpty()) {
+            if (!Intrinsics.areEqual(n.getMessages(), this.lastBoundMessages)) {
+                this.lastBoundMessages = n.getMessages();
+                String joinToString$default = StringUtils.joinToString(CollectionsKt.take(n.getMessages(), 3), "\n");
+                this.lastBoundMessagesText = joinToString$default;
+                this.expMessages.setText(joinToString$default);
+            }
+            this.expMessages.setVisibility(0);
+            this.expText.setVisibility(8);
+        } else {
+            this.lastBoundMessages = null;
+            this.expMessages.setVisibility(8);
+        }
+        int progress = n.getProgress();
+        if (progress < 0 || progress >= 101) {
+            this.expProgressBar.setVisibility(8);
+            stopIndeterminate();
+        } else {
+            this.expProgressBar.setVisibility(0);
+            if (this.expProgressBar.getWidth() > 0) {
+                this.progressBarWidth = this.expProgressBar.getWidth();
+            }
+            if (this.progressBarWidth > 0) {
+                if (n.getProgressIndeterminate()) {
+                    startIndeterminate();
+                } else {
+                    stopIndeterminate();
+                    setProgressFillWidth((this.progressBarWidth * n.getProgress()) / 100);
+                }
+            }
+        }
+        refreshProgressHitArea();
+        if (this.expProgressBar.getVisibility() == 0 && (this.progressHitBottom == 0 || this.progressBarWidth <= 0)) {
+            post(new Runnable() { // from class: io.github.colorisland.island.IslandView$$ExternalSyntheticLambda0
+                @Override // java.lang.Runnable
+                public final void run() {
+                    IslandView.this.applyProgressFill();
+                }
+            });
+        }
+        rebuildActions(n.getActions());
+        this.expandedWidthPx = Math.min(this.screenWidth - dp(28.0f), dp(IslandConfig.INSTANCE.getExpandedWidthDp()));
+        this.expandedHeightPx = dp(IslandConfig.INSTANCE.getExpandedHeightDp());
+        this.compactWidthPx = computeCompactWidth();
+        if (expand != this.expanded) {
+            setExpanded(expand, false);
+        }
+        applyCurrentSize(false);
+    }
+
+    public final void bindStatus(IslandSystemStatus s, boolean expand) {
+        Intrinsics.checkNotNullParameter(s, "s");
+        this.statusMode = true;
+        this.status = s;
+        this.notif = null;
+        boolean z = s.getType() == IslandSystemStatus.Type.FLASHLIGHT || s.getType() == IslandSystemStatus.Type.HOTSPOT;
+        this.compactToggle.setVisibility(z ? 0 : 8);
+        this.expToggle.setVisibility(z ? 0 : 8);
+        if (true ^ StringsKt.isBlank(s.getConnInfo())) {
+            this.expConnInfo.setText(s.getConnInfo());
+            this.expConnInfo.setVisibility(0);
+        } else {
+            this.expConnInfo.setVisibility(8);
+        }
+        if (this.compactIcon.getDrawable() != s.getIcon()) {
+            this.compactIcon.setImageDrawable(s.getIcon());
+            popIcon(this.compactIcon);
+        }
+        if (this.expIcon.getDrawable() != s.getIcon()) {
+            this.expIcon.setImageDrawable(s.getIcon());
+            popIcon(this.expIcon);
+        }
+        this.expAppName.setText(s.getSourceLabel());
+        this.expTitle.setText(s.getTitle());
+        this.expText.setText(s.getText());
+        this.expText.setVisibility(StringsKt.isBlank(s.getText()) ? 8 : 0);
+        this.actionsRow.removeAllViews();
+        this.actionsRow.setVisibility(8);
+        this.expSubText.setVisibility(8);
+        this.expMessages.setVisibility(8);
+        this.expProgressBar.setVisibility(8);
+        stopIndeterminate();
+        resetInteractionState();
+        this.expandedWidthPx = Math.min(this.screenWidth - dp(28.0f), dp(IslandConfig.INSTANCE.getExpandedWidthDp()));
+        this.expandedHeightPx = dp(IslandConfig.INSTANCE.getExpandedHeightDp());
+        this.compactWidthPx = computeCompactWidth();
+        if (expand != this.expanded) {
+            setExpanded(expand, false);
+        }
+        applyCurrentSize(false);
+    }
+
+    public final Listener getListener() {
+        return this.listener;
+    }
+
+    public final IslandNotification getNotif() {
+        return this.notif;
+    }
+
+    public final Function3<? super Integer, ? super Integer, ? super Boolean, Unit> getSizeChangeListener() {
+        return this.sizeChangeListener;
+    }
+
+    @Override // android.view.ViewGroup, android.view.View
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        refreshCutout();
+        applyCutoutSpacer();
+    }
+
+    @Override // android.widget.FrameLayout, android.view.ViewGroup, android.view.View
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        if (this.expanded || this.compactToggle.getVisibility() != 0) {
+            this.toggleHitLeft = 0;
+            this.toggleHitRight = 0;
+            this.toggleHitTop = 0;
+            this.toggleHitBottom = 0;
+        } else {
+            this.toggleHitLeft = this.compactToggle.getLeft();
+            this.toggleHitRight = this.compactToggle.getRight();
+            this.toggleHitTop = this.compactToggle.getTop();
+            this.toggleHitBottom = this.compactToggle.getBottom();
+        }
+        if (this.expanded) {
+            refreshExpandedCutoutInset();
+        }
+    }
+
+    @Override // android.view.View
+    public boolean onTouchEvent(MotionEvent event) {
+        IslandNotification islandNotification;
+        IslandSystemStatus islandSystemStatus;
+        Listener listener;
+        Float progressFractionAt;
+        Intrinsics.checkNotNullParameter(event, "event");
+        int actionMasked = event.getActionMasked();
+        if (actionMasked == 0) {
+            this.downX = event.getX();
+            this.downY = event.getY();
+            this.downTime = SystemClock.uptimeMillis();
+            if (!this.statusMode && this.expanded && this.expProgressBar.getVisibility() == 0 && (islandNotification = this.notif) != null && !islandNotification.getProgressIndeterminate() && event.getY() >= this.progressHitTop && event.getY() <= this.progressHitBottom) {
+                this.seeking = true;
+                ViewParent parent = getParent();
+                if (parent != null) {
+                    parent.requestDisallowInterceptTouchEvent(true);
+                }
+            }
+            return true;
+        }
+        if (actionMasked != 1) {
+            if (actionMasked == 2) {
+                if (this.seeking && (progressFractionAt = progressFractionAt(event.getX())) != null) {
+                    previewSeek(progressFractionAt.floatValue());
+                }
+                return true;
+            }
+            if (actionMasked != 3) {
+                return super.onTouchEvent(event);
+            }
+            if (this.seeking) {
+                endSeek();
+            }
+            return true;
+        }
+        if (this.seeking) {
+            Float progressFractionAt2 = progressFractionAt(event.getX());
+            endSeek();
+            if (progressFractionAt2 != null && (listener = this.listener) != null) {
+                listener.onSeek(progressFractionAt2.floatValue());
+            }
+            return true;
+        }
+        float x = event.getX() - this.downX;
+        float y = event.getY() - this.downY;
+        if (Math.abs(y) > dp(24.0f) && Math.abs(y) > Math.abs(x)) {
+            Listener listener2 = this.listener;
+            if (listener2 != null) {
+                listener2.onDismiss();
+            }
+            return true;
+        }
+        if (Math.abs(x) < dp(10.0f) && Math.abs(y) < dp(10.0f) && SystemClock.uptimeMillis() - this.downTime < 600) {
+            if (this.toggleHitRight > this.toggleHitLeft && event.getX() >= this.toggleHitLeft && event.getX() <= this.toggleHitRight && event.getY() >= this.toggleHitTop && event.getY() <= this.toggleHitBottom && this.statusMode && (islandSystemStatus = this.status) != null && (islandSystemStatus.getType() == IslandSystemStatus.Type.FLASHLIGHT || islandSystemStatus.getType() == IslandSystemStatus.Type.HOTSPOT)) {
+                Listener listener3 = this.listener;
+                if (listener3 != null) {
+                    listener3.onSystemStatusAction(islandSystemStatus.getType());
+                }
+                return true;
+            }
+            if (this.statusMode) {
+                Listener listener4 = this.listener;
+                if (listener4 != null) {
+                    listener4.onToggleExpand();
+                }
+            } else {
+                IslandNotification islandNotification2 = this.notif;
+                if (!this.expanded || islandNotification2 == null) {
+                    Listener listener5 = this.listener;
+                    if (listener5 != null) {
+                        listener5.onToggleExpand();
+                    }
+                } else {
+                    Listener listener6 = this.listener;
+                    if (listener6 != null) {
+                        listener6.onOpen(islandNotification2);
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    public final void refreshCutout() {
+        Object m5221constructorimpl;
+        try {
+            IslandView islandView = this;
+            Display display = getDisplay();
+            if (display == null) {
+                Object systemService = getContext().getSystemService("window");
+                WindowManager windowManager = systemService instanceof WindowManager ? (WindowManager) systemService : null;
+                display = windowManager != null ? windowManager.getDefaultDisplay() : null;
+            }
+            m5221constructorimpl = KResult.success(display != null ? display.getCutout() : null);
+        } catch (Throwable th) {
+            m5221constructorimpl = KResult.success(KResult.createFailure(th));
+        }
+        if (KResult.isFailureimpl(m5221constructorimpl)) {
+            m5221constructorimpl = null;
+        }
+        DisplayCutout displayCutout = (DisplayCutout) m5221constructorimpl;
+        Rect boundingRectTop = displayCutout != null ? displayCutout.getBoundingRectTop() : null;
+        Rect boundingRectLeft = displayCutout != null ? displayCutout.getBoundingRectLeft() : null;
+        Rect boundingRectRight = displayCutout != null ? displayCutout.getBoundingRectRight() : null;
+        this.cutoutWidthPx = Math.max(boundingRectTop != null ? boundingRectTop.width() : 0, Math.max(boundingRectLeft != null ? boundingRectLeft.width() : 0, boundingRectRight != null ? boundingRectRight.width() : 0));
+        this.cutoutBottomPx = Math.max(boundingRectTop != null ? boundingRectTop.bottom : 0, Math.max(boundingRectLeft != null ? boundingRectLeft.bottom : 0, boundingRectRight != null ? boundingRectRight.bottom : 0));
+    }
+
+    public final void setExpanded(boolean expand, boolean animate) {
+        if (this.expanded == expand) {
+            return;
+        }
+        this.expanded = expand;
+        this.bgDrawable.setCornerRadius(IslandConfig.INSTANCE.getCornerRadiusDp() > 0 ? dpF(IslandConfig.INSTANCE.getCornerRadiusDp()) : expand ? dpF(24.0f) : dpF(IslandConfig.INSTANCE.getCompactHeightDp() / 2.0f));
+        long j = animate ? 320L : 0L;
+        final int i = this.layerAnimGeneration + 1;
+        this.layerAnimGeneration = i;
+        Runnable runnable = new Runnable() { // from class: io.github.colorisland.island.IslandView$$ExternalSyntheticLambda5
+            @Override // java.lang.Runnable
+            public final void run() {
+                IslandView.setExpanded$lambda$20(i, IslandView.this);
+            }
+        };
+        if (animate) {
+            this.compactRoot.setLayerType(2, null);
+            this.expandedRoot.setLayerType(2, null);
+        }
+        if (expand) {
+            this.expandedRoot.setVisibility(0);
