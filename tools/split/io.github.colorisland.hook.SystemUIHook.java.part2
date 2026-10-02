@@ -1,0 +1,464 @@
+            m5221constructorimpl3 = KResult.success(cls.getDeclaredMethod("shouldPeekByOS", cls2));
+        } catch (Throwable th3) {
+            m5221constructorimpl3 = KResult.success(KResult.createFailure(th3));
+        }
+        Method method = (Method) (KResult.isFailureimpl(m5221constructorimpl3) ? null : m5221constructorimpl3);
+        if (method == null) {
+            log(module, 5, "shouldPeekByOS not found, system capsule hide disabled");
+            return;
+        }
+        try {
+            SystemUIHook systemUIHook4 = this;
+            module.hook(method).intercept(new XposedInterface.Hooker() { // from class: io.github.colorisland.hook.SystemUIHook$$ExternalSyntheticLambda9
+                public final Object intercept(XposedInterface.Chain chain) throws Throwable {
+                    Object hookHeadsUp$lambda$44$lambda$43;
+                    hookHeadsUp$lambda$44$lambda$43 = SystemUIHook.hookHeadsUp$lambda$44$lambda$43(SystemUIHook.this, module, chain);
+                    return hookHeadsUp$lambda$44$lambda$43;
+                }
+            });
+            log(module, 4, "hooked HeadsUpHelper.shouldPeekByOS");
+            m5221constructorimpl4 = KResult.success(Unit.INSTANCE);
+        } catch (Throwable th4) {
+            m5221constructorimpl4 = KResult.success(KResult.createFailure(th4));
+        }
+        Throwable m5224exceptionOrNullimpl = KResult.exceptionOrNullimpl(m5221constructorimpl4);
+        if (m5224exceptionOrNullimpl != null) {
+            INSTANCE.log(module, 6, "hook shouldPeekByOS failed: " + m5224exceptionOrNullimpl.getMessage());
+        }
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public static final Object hookHeadsUp$lambda$44$lambda$43(SystemUIHook systemUIHook, XposedModule xposedModule, XposedInterface.Chain chain) throws Throwable {
+        Intrinsics.checkNotNullParameter(chain, "chain");
+        List args = chain.getArgs();
+        Object orNull = args != null ? CollectionsKt.getOrNull(args, 0) : null;
+        StatusBarNotification statusBarNotification = orNull instanceof StatusBarNotification ? (StatusBarNotification) orNull : null;
+        if (statusBarNotification == null || !IslandController.INSTANCE.shouldSuppressSystemPeek(statusBarNotification)) {
+            return chain.proceed();
+        }
+        systemUIHook.log(xposedModule, 4, "suppress system capsule peek: " + statusBarNotification.getKey());
+        return false;
+    }
+
+    private final void hookNotificationListener(final XposedModule module, ClassLoader classLoader) {
+        Object m5221constructorimpl;
+        Object obj;
+        Object obj2;
+        Object m5221constructorimpl2;
+        Object m5221constructorimpl3;
+        Object m5221constructorimpl4;
+        Object m5221constructorimpl5;
+        Object m5221constructorimpl6;
+        try {
+            SystemUIHook systemUIHook = this;
+            m5221constructorimpl = KResult.success(classLoader.loadClass(COLOR_LISTENER));
+        } catch (Throwable th) {
+            m5221constructorimpl = KResult.success(KResult.createFailure(th));
+        }
+        if (KResult.isFailureimpl(m5221constructorimpl)) {
+            m5221constructorimpl = null;
+        }
+        Class cls = (Class) m5221constructorimpl;
+        if (cls == null) {
+            log(module, 6, "com.android.systemui.statusbar.NotificationListener not found, island disabled");
+            return;
+        }
+        try {
+            SystemUIHook systemUIHook2 = this;
+            obj = KResult.success(classLoader.loadClass("android.service.notification.StatusBarNotification"));
+        } catch (Throwable th2) {
+            obj = KResult.success(KResult.createFailure(th2));
+        }
+        boolean m5227isFailureimpl = KResult.isFailureimpl(obj);
+        Object obj3 = obj;
+        if (m5227isFailureimpl) {
+            obj3 = null;
+        }
+        Class<?> cls2 = (Class) obj3;
+        try {
+            SystemUIHook systemUIHook3 = this;
+            obj2 = KResult.success(classLoader.loadClass("android.service.notification.NotificationListenerService$RankingMap"));
+        } catch (Throwable th3) {
+            obj2 = KResult.success(KResult.createFailure(th3));
+        }
+        boolean m5227isFailureimpl2 = KResult.isFailureimpl(obj2);
+        Object obj4 = obj2;
+        if (m5227isFailureimpl2) {
+            obj4 = null;
+        }
+        Class<?> cls3 = (Class) obj4;
+        if (cls2 == null || cls3 == null) {
+            log(module, 6, "StatusBarNotification/RankingMap not found, island disabled");
+            return;
+        }
+        try {
+            SystemUIHook systemUIHook4 = this;
+            m5221constructorimpl2 = KResult.success(cls.getDeclaredMethod("onNotificationPosted", cls2, cls3));
+        } catch (Throwable th4) {
+            m5221constructorimpl2 = KResult.success(KResult.createFailure(th4));
+        }
+        if (KResult.isFailureimpl(m5221constructorimpl2)) {
+            m5221constructorimpl2 = null;
+        }
+        Method method = (Method) m5221constructorimpl2;
+        if (method == null) {
+            log(module, 6, "NotificationListener.onNotificationPosted not found, island disabled");
+        } else {
+            try {
+                SystemUIHook systemUIHook5 = this;
+                module.hook(method).intercept(new XposedInterface.Hooker() { // from class: io.github.colorisland.hook.SystemUIHook$$ExternalSyntheticLambda10
+                    public final Object intercept(XposedInterface.Chain chain) throws Throwable {
+                        Object hookNotificationListener$lambda$22$lambda$21;
+                        hookNotificationListener$lambda$22$lambda$21 = SystemUIHook.hookNotificationListener$lambda$22$lambda$21(SystemUIHook.this, module, chain);
+                        return hookNotificationListener$lambda$22$lambda$21;
+                    }
+                });
+                log(module, 4, "hooked NotificationListener.onNotificationPosted");
+                m5221constructorimpl3 = KResult.success(Unit.INSTANCE);
+            } catch (Throwable th5) {
+                m5221constructorimpl3 = KResult.success(KResult.createFailure(th5));
+            }
+            Throwable m5224exceptionOrNullimpl = KResult.exceptionOrNullimpl(m5221constructorimpl3);
+            if (m5224exceptionOrNullimpl != null) {
+                INSTANCE.log(module, 6, "hook onNotificationPosted failed: " + m5224exceptionOrNullimpl.getMessage());
+            }
+        }
+        try {
+            SystemUIHook systemUIHook6 = this;
+            m5221constructorimpl4 = KResult.success(cls.getDeclaredMethod("onNotificationRemoved", cls2, cls3));
+        } catch (Throwable th6) {
+            m5221constructorimpl4 = KResult.success(KResult.createFailure(th6));
+        }
+        if (KResult.isFailureimpl(m5221constructorimpl4)) {
+            m5221constructorimpl4 = null;
+        }
+        Method method2 = (Method) m5221constructorimpl4;
+        try {
+            SystemUIHook systemUIHook7 = this;
+            m5221constructorimpl5 = KResult.success(cls.getDeclaredMethod("onNotificationRemoved", cls2, cls3, Integer.TYPE));
+        } catch (Throwable th7) {
+            m5221constructorimpl5 = KResult.success(KResult.createFailure(th7));
+        }
+        if (KResult.isFailureimpl(m5221constructorimpl5)) {
+            m5221constructorimpl5 = null;
+        }
+        for (Pair pair : java.util.Arrays.asList(new Pair[]{TuplesKt.to(method2, "onNotificationRemoved(sbn,ranking)"), TuplesKt.to((Method) m5221constructorimpl5, "onNotificationRemoved(sbn,ranking,reason)")})) {
+            Method method3 = (Method) pair.component1();
+            String str = (String) pair.component2();
+            if (method3 == null) {
+                log(module, 5, "NotificationListener." + str + " not found");
+            } else {
+                try {
+                    SystemUIHook systemUIHook8 = this;
+                    module.hook(method3).intercept(new XposedInterface.Hooker() { // from class: io.github.colorisland.hook.SystemUIHook$$ExternalSyntheticLambda1
+                        public final Object intercept(XposedInterface.Chain chain) throws Throwable {
+                            Object hookNotificationListener$lambda$30$lambda$29;
+                            hookNotificationListener$lambda$30$lambda$29 = SystemUIHook.hookNotificationListener$lambda$30$lambda$29(SystemUIHook.this, module, chain);
+                            return hookNotificationListener$lambda$30$lambda$29;
+                        }
+                    });
+                    log(module, 4, "hooked NotificationListener." + str);
+                    m5221constructorimpl6 = KResult.success(Unit.INSTANCE);
+                } catch (Throwable th8) {
+                    m5221constructorimpl6 = KResult.success(KResult.createFailure(th8));
+                }
+                Throwable m5224exceptionOrNullimpl2 = KResult.exceptionOrNullimpl(m5221constructorimpl6);
+                if (m5224exceptionOrNullimpl2 != null) {
+                    INSTANCE.log(module, 6, "hook " + str + " failed: " + m5224exceptionOrNullimpl2.getMessage());
+                }
+            }
+        }
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public static final Object hookNotificationListener$lambda$22$lambda$21(SystemUIHook systemUIHook, XposedModule xposedModule, XposedInterface.Chain chain) throws Throwable {
+        Object m5221constructorimpl;
+        Intrinsics.checkNotNullParameter(chain, "chain");
+        if (notificationListener == null) {
+            notificationListener = chain.getThisObject();
+            Object thisObject = chain.getThisObject();
+            Intrinsics.checkNotNullExpressionValue(thisObject, "getThisObject(...)");
+            systemUIHook.installTakeoverCallbacks(xposedModule, thisObject);
+        }
+        List args = chain.getArgs();
+        Object orNull = args != null ? CollectionsKt.getOrNull(args, 0) : null;
+        StatusBarNotification statusBarNotification = orNull instanceof StatusBarNotification ? (StatusBarNotification) orNull : null;
+        if (statusBarNotification != null) {
+            if (systemUIHook.getVERBOSE_HOOK()) {
+                Log.d("ColorIsland", "onNotificationPosted pkg=" + statusBarNotification.getPackageName());
+            }
+            try {
+                IslandController.INSTANCE.onPosted(statusBarNotification);
+                m5221constructorimpl = KResult.success(Unit.INSTANCE);
+            } catch (Throwable th) {
+                m5221constructorimpl = KResult.success(KResult.createFailure(th));
+            }
+            Throwable m5224exceptionOrNullimpl = KResult.exceptionOrNullimpl(m5221constructorimpl);
+            if (m5224exceptionOrNullimpl != null) {
+                systemUIHook.log(xposedModule, 5, "onPosted failed: " + m5224exceptionOrNullimpl.getMessage());
+            }
+        }
+        return chain.proceed();
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public static final Object hookNotificationListener$lambda$30$lambda$29(SystemUIHook systemUIHook, XposedModule xposedModule, XposedInterface.Chain chain) throws Throwable {
+        Object m5221constructorimpl;
+        Intrinsics.checkNotNullParameter(chain, "chain");
+        List args = chain.getArgs();
+        Object orNull = args != null ? CollectionsKt.getOrNull(args, 0) : null;
+        StatusBarNotification statusBarNotification = orNull instanceof StatusBarNotification ? (StatusBarNotification) orNull : null;
+        if (statusBarNotification != null) {
+            try {
+                IslandController.INSTANCE.onRemoved(statusBarNotification);
+                m5221constructorimpl = KResult.success(Unit.INSTANCE);
+            } catch (Throwable th) {
+                m5221constructorimpl = KResult.success(KResult.createFailure(th));
+            }
+            Throwable m5224exceptionOrNullimpl = KResult.exceptionOrNullimpl(m5221constructorimpl);
+            if (m5224exceptionOrNullimpl != null) {
+                systemUIHook.log(xposedModule, 5, "onRemoved failed: " + m5224exceptionOrNullimpl.getMessage());
+            }
+        }
+        return chain.proceed();
+    }
+
+    /* JADX WARN: Removed duplicated region for block: B:41:0x0125  */
+    /*
+        Code decompiled incorrectly, please refer to instructions dump.
+        To view partially-correct add '--show-bad-code' argument
+    */
+        /**
+     * 隐藏系统状态栏图标（v1.0 smali hookStatusBarIcons 逐条翻译）。
+     *
+     * 对 StatusBarIconControllerImpl.setIcon 的多个重载签名逐一探测并 hook，
+     * 命中 HIDDEN_ICON_SLOT（hotspot）时返回 null 拦截图标设置。
+     * 任一类缺失或签名不匹配仅记录日志，不中断 install 链。
+     */
+    private final void hookStatusBarIcons(XposedModule module, ClassLoader classLoader) {
+        // 1) 加载 StatusBarIconControllerImpl（不同 ROM 路径可能变化，失败则放弃图标隐藏）
+        Class<?> iconController;
+        try {
+            iconController = classLoader.loadClass("com.android.systemui.statusbar.phone.StatusBarIconControllerImpl");
+        } catch (Throwable th) {
+            iconController = null;
+        }
+        if (iconController == null) {
+            log(module, 5, "com.android.systemui.statusbar.phone.StatusBarIconControllerImpl not found, icon hide disabled");
+            return;
+        }
+        // 2) setIcon 重载签名候选（覆盖不同 Android 版本）
+        List<Class<?>[]> signatures = new ArrayList<>();
+        signatures.add(new Class[]{String.class, Integer.TYPE, CharSequence.class});
+        signatures.add(new Class[]{String.class, Integer.TYPE, Integer.TYPE, CharSequence.class});
+        // 3) StatusBarIconHolder 存在时追加 (String, StatusBarIconHolder) 重载
+        Class<?> iconHolder;
+        try {
+            iconHolder = classLoader.loadClass("com.android.systemui.statusbar.phone.StatusBarIconHolder");
+        } catch (Throwable th) {
+            iconHolder = null;
+        }
+        if (iconHolder != null) {
+            signatures.add(new Class[]{String.class, iconHolder});
+        }
+        // 4) 逐签名探测并 hook（仅成功计数）
+        int hooked = 0;
+        for (final Class<?>[] signature : signatures) {
+            Method method;
+            try {
+                method = iconController.getDeclaredMethod("setIcon", signature);
+            } catch (Throwable th) {
+                method = null;
+            }
+            if (method == null) {
+                log(module, 5, "setIcon" + signature.length + " not found");
+                continue;
+            }
+            try {
+                module.hook(method).intercept(new XposedInterface.Hooker() { // from class: io.github.colorisland.hook.SystemUIHook$$ExternalSyntheticLambda4
+                    public final Object intercept(XposedInterface.Chain chain) throws Throwable {
+                        return SystemUIHook.hookStatusBarIcons$lambda$39$lambda$37$lambda$36(SystemUIHook.this, module, chain);
+                    }
+                });
+            } catch (Throwable th) {
+                log(module, 5, "hook setIcon" + signature.length + " failed: " + th.getMessage());
+                continue;
+            }
+            hooked++;
+        }
+        log(module, 4, "status bar icon hide installed, hooked=" + hooked + " slot=hotspot");
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public static final Object hookStatusBarIcons$lambda$39$lambda$37$lambda$36(SystemUIHook systemUIHook, XposedModule xposedModule, XposedInterface.Chain chain) throws Throwable {
+        Intrinsics.checkNotNullParameter(chain, "chain");
+        List args = chain.getArgs();
+        Object orNull = args != null ? CollectionsKt.getOrNull(args, 0) : null;
+        String str = orNull instanceof String ? (String) orNull : null;
+        if (!Intrinsics.areEqual(str, HIDDEN_ICON_SLOT)) {
+            return chain.proceed();
+        }
+        if (systemUIHook.getVERBOSE_HOOK()) {
+            systemUIHook.log(xposedModule, 4, "hide status bar icon: " + str);
+        }
+        return null;
+    }
+
+    private final void installTakeoverCallbacks(XposedModule module, final Object listener) {
+        IslandController.INSTANCE.setCancelSystemNotification(new Function1() { // from class: io.github.colorisland.hook.SystemUIHook$$ExternalSyntheticLambda0
+            @Override // kotlin.jvm.functions.Function1
+            public final Object invoke(Object obj) {
+                Unit installTakeoverCallbacks$lambda$77;
+                installTakeoverCallbacks$lambda$77 = SystemUIHook.installTakeoverCallbacks$lambda$77(listener, (StatusBarNotification) obj);
+                return installTakeoverCallbacks$lambda$77;
+            }
+        });
+        IslandController.INSTANCE.setRestoreSystemNotification(new Function1() { // from class: io.github.colorisland.hook.SystemUIHook$$ExternalSyntheticLambda2
+            @Override // kotlin.jvm.functions.Function1
+            public final Object invoke(Object obj) {
+                Unit installTakeoverCallbacks$lambda$81;
+                installTakeoverCallbacks$lambda$81 = SystemUIHook.installTakeoverCallbacks$lambda$81(listener, (StatusBarNotification) obj);
+                return installTakeoverCallbacks$lambda$81;
+            }
+        });
+        log(module, 4, "takeover callbacks installed");
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public static final Unit installTakeoverCallbacks$lambda$77(Object obj, StatusBarNotification sbn) {
+        Object m5221constructorimpl;
+        Intrinsics.checkNotNullParameter(sbn, "sbn");
+        try {
+            m5221constructorimpl = KResult.success(obj.getClass().getMethod("cancelNotification", String.class).invoke(obj, sbn.getKey()));
+        } catch (Throwable th) {
+            m5221constructorimpl = KResult.success(KResult.createFailure(th));
+        }
+        KResult.throwOnFailure(m5221constructorimpl);
+        return Unit.INSTANCE;
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public static final Unit installTakeoverCallbacks$lambda$81(Object obj, StatusBarNotification sbn) {
+        Object m5221constructorimpl;
+        Object m5221constructorimpl2;
+        Notification notification;
+        Intrinsics.checkNotNullParameter(sbn, "sbn");
+        SystemUIHook systemUIHook = INSTANCE;
+        try {
+            systemUIHook.enqueueNotification(sbn);
+            m5221constructorimpl = KResult.success(Unit.INSTANCE);
+        } catch (Throwable th) {
+            m5221constructorimpl = KResult.success(KResult.createFailure(th));
+        }
+        if (!KResult.isSuccessimpl(m5221constructorimpl)) {
+            Log.w("ColorIsland", "restore primary enqueue failed, fallback notify: " + sbn.getKey());
+            try {
+                Context context = obj instanceof Context ? (Context) obj : null;
+                if (context != null) {
+                    Object systemService = context.getSystemService("notification");
+                    NotificationManager notificationManager = systemService instanceof NotificationManager ? (NotificationManager) systemService : null;
+                    if (notificationManager != null && (notification = sbn.getNotification()) != null) {
+                        notificationManager.notify(sbn.getTag(), sbn.getId(), notification);
+                    }
+                }
+                m5221constructorimpl2 = KResult.success(Unit.INSTANCE);
+            } catch (Throwable th2) {
+                m5221constructorimpl2 = KResult.success(KResult.createFailure(th2));
+            }
+            Throwable m5224exceptionOrNullimpl = KResult.exceptionOrNullimpl(m5221constructorimpl2);
+            if (m5224exceptionOrNullimpl != null) {
+                Log.e("ColorIsland", "restore fallback notify also failed: " + sbn.getKey() + " " + m5224exceptionOrNullimpl.getMessage());
+            }
+        }
+        return Unit.INSTANCE;
+    }
+
+    private final boolean isSuppressCapsuleItem(Object item) {
+        Object m5221constructorimpl;
+        if (!IslandConfig.INSTANCE.getMasterEnabled() || !IslandConfig.INSTANCE.getHideSystemCapsule()) {
+            return false;
+        }
+        Class<?> cls = item.getClass();
+        try {
+            SystemUIHook systemUIHook = this;
+            Object invoke = cls.getMethod("getPackageName", new Class[0]).invoke(item, new Object[0]);
+            m5221constructorimpl = KResult.success(invoke instanceof String ? (String) invoke : null);
+        } catch (Throwable th) {
+            m5221constructorimpl = KResult.success(KResult.createFailure(th));
+        }
+        String str = (String) (KResult.isFailureimpl(m5221constructorimpl) ? null : m5221constructorimpl);
+        if (str == null) {
+            return false;
+        }
+        return Intrinsics.areEqual(str, "com.oplus.wirelesssettings");
+    }
+
+    private final void log(XposedModule module, int level, String message) {
+        if (level == 5) {
+            Log.w("ColorIsland", message);
+        } else if (level != 6) {
+            Log.i("ColorIsland", message);
+        } else {
+            Log.e("ColorIsland", message);
+        }
+        try {
+            SystemUIHook systemUIHook = this;
+            module.log(level, "ColorIsland", message);
+        } catch (Throwable th) {
+        }
+    }
+
+    private final Object readCapsuleSeedlingInfo(View v) {
+        Object m5221constructorimpl;
+        Object m5221constructorimpl2;
+        try {
+            SystemUIHook systemUIHook = this;
+            Field declaredField = v.getClass().getDeclaredField("seedlingInfo");
+            declaredField.setAccessible(true);
+            m5221constructorimpl = KResult.success(declaredField.get(v));
+        } catch (Throwable th) {
+            m5221constructorimpl = KResult.success(KResult.createFailure(th));
+        }
+        if (KResult.isFailureimpl(m5221constructorimpl)) {
+            m5221constructorimpl = null;
+        }
+        if (m5221constructorimpl != null) {
+            return m5221constructorimpl;
+        }
+        try {
+            SystemUIHook systemUIHook2 = this;
+            m5221constructorimpl2 = KResult.success(v.getClass().getMethod("getCapsuleSeedlingCard", new Class[0]).invoke(v, new Object[0]));
+        } catch (Throwable th2) {
+            m5221constructorimpl2 = KResult.success(KResult.createFailure(th2));
+        }
+        if (KResult.isFailureimpl(m5221constructorimpl2)) {
+            return null;
+        }
+        return m5221constructorimpl2;
+    }
+
+    private final void suppressCapsuleShow(XposedModule module, Object info) {
+        Object m5221constructorimpl;
+        if (isSuppressCapsuleItem(info)) {
+            try {
+                SystemUIHook systemUIHook = this;
+                m5221constructorimpl = KResult.success(info.getClass().getMethod("setShouldShow", Boolean.TYPE).invoke(info, false));
+            } catch (Throwable th) {
+                m5221constructorimpl = KResult.success(KResult.createFailure(th));
+            }
+            Throwable m5224exceptionOrNullimpl = KResult.exceptionOrNullimpl(m5221constructorimpl);
+            if (m5224exceptionOrNullimpl != null) {
+                INSTANCE.log(module, 5, "setShouldShow failed: " + m5224exceptionOrNullimpl.getMessage());
+            }
+        }
+    }
+
+    public final void install(XposedModule module, XposedModuleInterface.PackageLoadedParam param) {
+        Intrinsics.checkNotNullParameter(module, "module");
+        Intrinsics.checkNotNullParameter(param, "param");
+        ClassLoader defaultClassLoader = param.getDefaultClassLoader();
+        Intrinsics.checkNotNullExpressionValue(defaultClassLoader, "getDefaultClassLoader(...)");
+        hookApplication(module, defaultClassLoader);
+        hookNotificationListener(module, defaultClassLoader);
+        hookFlashlight(module, defaultClassLoader);
+        hookStatusBarIcons(module, defaultClassLoader);
