@@ -1,0 +1,501 @@
+            current = newCurrent;
+            IslandWindow w = window;
+            if (w != null) {
+                w.bind(newCurrent, expanded);
+            }
+            return;
+        }
+        // 7) 队列中已存在同 key：整体替换
+        List<IslandNotification> snapshot = CollectionsKt.toMutableList(queue);
+        int sameKeyIndex = -1;
+        for (int i = 0; i < snapshot.size(); i++) {
+            if (Intrinsics.areEqual(snapshot.get(i).getKey(), updated.getKey())) {
+                sameKeyIndex = i;
+                break;
+            }
+        }
+        if (sameKeyIndex >= 0) {
+            snapshot.set(sameKeyIndex, updated);
+            queue.clear();
+            queue.addAll(snapshot);
+            return;
+        }
+        // 8) 队列中已存在同包：仅更新该元素的 groupCount（保留队列位置）
+        int samePkgIndex = -1;
+        for (int i = 0; i < snapshot.size(); i++) {
+            if (Intrinsics.areEqual(snapshot.get(i).getPkg(), updated.getPkg())) {
+                samePkgIndex = i;
+                break;
+            }
+        }
+        if (samePkgIndex >= 0) {
+            IslandNotification replaced = IslandNotification.copy$default(snapshot.get(samePkgIndex),
+                    null, null, null, null, null, null, 0L, null, null, null, 0, false, null,
+                    updated.getGroupCount(), 0x1FFF, null);
+            snapshot.set(samePkgIndex, replaced);
+            queue.clear();
+            queue.addAll(snapshot);
+            return;
+        }
+        // 9) 新通知入队；超过 16 条从队首淘汰
+        queue.addLast(updated);
+        while (queue.size() > 16) {
+            IslandNotification dropped = queue.removeFirst();
+            if (getVERBOSE()) {
+                Log.i("ColorIsland", "queue overflow, dropped oldest: " + dropped.getPkg());
+            }
+        }
+        // 10) 系统应用接管（开启后由模块代为取消系统通知）
+        if (IslandConfig.INSTANCE.getSysAppTakeover() && meta.isSystem()) {
+            takeOverSystemNotification(sbn);
+        }
+        // 11) 当前无展示内容时立即显示下一条
+        if (current == null && currentStatus == null) {
+            showNext();
+        }
+    }
+
+    private final void handleRemoved(final StatusBarNotification sbn) {
+        if (selfCancelled.remove(sbn.getKey())) {
+            CollectionsKt.removeAll((List) queue, new Function1() { // from class: io.github.colorisland.island.IslandController$$ExternalSyntheticLambda33
+                @Override // kotlin.jvm.functions.Function1
+                public final Object invoke(Object obj) {
+                    boolean handleRemoved$lambda$32;
+                    handleRemoved$lambda$32 = IslandController.handleRemoved$lambda$32(sbn, (IslandNotification) obj);
+                    return Boolean.valueOf(handleRemoved$lambda$32);
+                }
+            });
+            return;
+        }
+        CollectionsKt.removeAll((List) queue, new Function1() { // from class: io.github.colorisland.island.IslandController$$ExternalSyntheticLambda1
+            @Override // kotlin.jvm.functions.Function1
+            public final Object invoke(Object obj) {
+                boolean handleRemoved$lambda$33;
+                handleRemoved$lambda$33 = IslandController.handleRemoved$lambda$33(sbn, (IslandNotification) obj);
+                return Boolean.valueOf(handleRemoved$lambda$33);
+            }
+        });
+        trackedKeys.remove(sbn.getKey());
+        CollectionsKt.removeAll((List) takenOver, new Function1() { // from class: io.github.colorisland.island.IslandController$$ExternalSyntheticLambda2
+            @Override // kotlin.jvm.functions.Function1
+            public final Object invoke(Object obj) {
+                boolean handleRemoved$lambda$34;
+                handleRemoved$lambda$34 = IslandController.handleRemoved$lambda$34(sbn, (StatusBarNotification) obj);
+                return Boolean.valueOf(handleRemoved$lambda$34);
+            }
+        });
+        IslandNotification islandNotification = current;
+        if (Intrinsics.areEqual(islandNotification != null ? islandNotification.getKey() : null, sbn.getKey())) {
+            hide();
+        }
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public static final boolean handleRemoved$lambda$32(StatusBarNotification statusBarNotification, IslandNotification it) {
+        Intrinsics.checkNotNullParameter(it, "it");
+        return Intrinsics.areEqual(it.getKey(), statusBarNotification.getKey());
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public static final boolean handleRemoved$lambda$33(StatusBarNotification statusBarNotification, IslandNotification it) {
+        Intrinsics.checkNotNullParameter(it, "it");
+        return Intrinsics.areEqual(it.getKey(), statusBarNotification.getKey());
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public static final boolean handleRemoved$lambda$34(StatusBarNotification statusBarNotification, StatusBarNotification it) {
+        Intrinsics.checkNotNullParameter(it, "it");
+        return Intrinsics.areEqual(it.getKey(), statusBarNotification.getKey());
+    }
+
+    private final void hide() {
+        current = null;
+        expanded = false;
+        dismissIsland();
+    }
+
+    private final void hideDispatched() {
+        if (dispatchActive) {
+            dispatchActive = false;
+            mainHandler.removeCallbacks(dispatchHideRunnable);
+            current = null;
+            expanded = false;
+            dismissIsland();
+        }
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public static final void hideRunnable$lambda$2() {
+        INSTANCE.hide();
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public static final void hideSystemStatus$lambda$47() {
+        if (currentStatus == null) {
+            return;
+        }
+        IslandController islandController = INSTANCE;
+        if (islandController.getVERBOSE()) {
+            IslandSystemStatus islandSystemStatus = currentStatus;
+            IslandSystemStatus.Type type = islandSystemStatus != null ? islandSystemStatus.getType() : null;
+            IslandSystemStatus islandSystemStatus2 = currentStatus;
+            Log.w("ColorIsland", "hideSystemStatus: " + type + " persistent=" + (islandSystemStatus2 != null ? Boolean.valueOf(islandSystemStatus2.getPersistent()) : null) + " queue=" + queue.size());
+        }
+        currentStatus = null;
+        islandController.dismissIsland();
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public static final void hideSystemStatusDelayed$lambda$48() {
+        INSTANCE.hideSystemStatus();
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public static final Unit init$lambda$13$lambda$10() {
+        mainHandler.post(new Runnable() { // from class: io.github.colorisland.island.IslandController$$ExternalSyntheticLambda28
+            @Override // java.lang.Runnable
+            public final void run() {
+                IslandController.init$lambda$13$lambda$10$lambda$9();
+            }
+        });
+        return Unit.INSTANCE;
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public static final void init$lambda$13$lambda$10$lambda$9() {
+        IslandWindow islandWindow = window;
+        if (islandWindow != null) {
+            islandWindow.applyColors();
+        }
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public static final Unit init$lambda$13$lambda$12() {
+        mainHandler.post(new Runnable() { // from class: io.github.colorisland.island.IslandController$$ExternalSyntheticLambda4
+            @Override // java.lang.Runnable
+            public final void run() {
+                IslandController.init$lambda$13$lambda$12$lambda$11();
+            }
+        });
+        return Unit.INSTANCE;
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public static final void init$lambda$13$lambda$12$lambda$11() {
+        IslandWindow islandWindow = window;
+        if (islandWindow != null) {
+            islandWindow.applyCutoutSpacer();
+        }
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public static final Unit init$lambda$13$lambda$7(final int i) {
+        mainHandler.post(new Runnable() { // from class: io.github.colorisland.island.IslandController$$ExternalSyntheticLambda0
+            @Override // java.lang.Runnable
+            public final void run() {
+                IslandController.init$lambda$13$lambda$7$lambda$6(i);
+            }
+        });
+        return Unit.INSTANCE;
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public static final void init$lambda$13$lambda$7$lambda$6(int i) {
+        IslandWindow islandWindow = window;
+        if (islandWindow != null) {
+            islandWindow.applyYOffset(i);
+        }
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public static final Unit init$lambda$13$lambda$8() {
+        INSTANCE.dismissDisabledStatus();
+        return Unit.INSTANCE;
+    }
+
+    private final boolean isFlashlightNotification(StatusBarNotification sbn) {
+        String notificationText = notificationText(sbn);
+        return StringUtils.contains(notificationText, "手电筒") || StringUtils.contains(notificationText, "闪光灯");
+    }
+
+    private final boolean isSystemApp(ApplicationInfo appInfo) {
+        int i = appInfo.flags;
+        return ((i & 1) == 0 && (i & 128) == 0) ? false : true;
+    }
+
+    private final String notificationText(StatusBarNotification sbn) {
+        Bundle bundle;
+        String str;
+        String obj;
+        Notification notification = sbn.getNotification();
+        String str2 = "";
+        if (notification == null || (bundle = notification.extras) == null) {
+            return "";
+        }
+        CharSequence charSequence = bundle.getCharSequence(NotificationCompat.EXTRA_TITLE);
+        if (charSequence == null || (str = charSequence.toString()) == null) {
+            str = "";
+        }
+        CharSequence charSequence2 = bundle.getCharSequence(NotificationCompat.EXTRA_TEXT);
+        if (charSequence2 != null && (obj = charSequence2.toString()) != null) {
+            str2 = obj;
+        }
+        return str + " " + str2;
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public static final void onPosted$lambda$14(StatusBarNotification statusBarNotification) {
+        INSTANCE.handlePosted(statusBarNotification);
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public static final void onRemoved$lambda$15(StatusBarNotification statusBarNotification) {
+        INSTANCE.handleRemoved(statusBarNotification);
+    }
+
+    private final void rescheduleDispatchHide(long timeoutMs) {
+        Handler handler = mainHandler;
+        Runnable runnable = dispatchHideRunnable;
+        handler.removeCallbacks(runnable);
+        if (timeoutMs > 0) {
+            handler.postDelayed(runnable, timeoutMs);
+        }
+    }
+
+    private final void restoreTakenOver() {
+        Object m5221constructorimpl;
+        Unit unit;
+        List<StatusBarNotification> list = takenOver;
+        if (list.isEmpty()) {
+            return;
+        }
+        List<StatusBarNotification> list2 = CollectionsKt.toList(list);
+        list.clear();
+        for (StatusBarNotification statusBarNotification : list2) {
+            Set<String> set = selfRestored;
+            String key = statusBarNotification.getKey();
+            Intrinsics.checkNotNullExpressionValue(key, "getKey(...)");
+            set.add(key);
+            try {
+                Function1<? super StatusBarNotification, Unit> function1 = restoreSystemNotification;
+                if (function1 != null) {
+                    function1.invoke(statusBarNotification);
+                    unit = Unit.INSTANCE;
+                } else {
+                    unit = null;
+                }
+                m5221constructorimpl = KResult.success(unit);
+            } catch (Throwable th) {
+                m5221constructorimpl = KResult.success(KResult.createFailure(th));
+            }
+            Throwable m5224exceptionOrNullimpl = KResult.exceptionOrNullimpl(m5221constructorimpl);
+            if (m5224exceptionOrNullimpl != null) {
+                Log.w("ColorIsland", "restoreSystemNotification failed: " + m5224exceptionOrNullimpl.getMessage());
+                selfRestored.remove(statusBarNotification.getKey());
+            }
+        }
+    }
+
+    private final void scheduleHide() {
+        cancelTimers();
+        long expandedDurationMs = IslandConfig.INSTANCE.getExpandedDurationMs();
+        long j = EXPAND_DELAY_MS + expandedDurationMs;
+        long max = Math.max(IslandConfig.INSTANCE.getDisplayDurationMs(), expandedDurationMs + 1050);
+        Handler handler = mainHandler;
+        handler.postDelayed(collapseRunnable, j);
+        handler.postDelayed(hideRunnable, max);
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public static final void seekNotification$lambda$74(Context context, float f, IslandNotification islandNotification) {
+        Object m5221constructorimpl;
+        MediaMetadata metadata;
+        IslandController islandController = INSTANCE;
+        try {
+            MediaSessionManager mediaSessionManager = (MediaSessionManager) context.getSystemService(MediaSessionManager.class);
+            if (mediaSessionManager != null) {
+                Object obj = null;
+                List<MediaController> activeSessions = mediaSessionManager.getActiveSessions(null);
+                Intrinsics.checkNotNullExpressionValue(activeSessions, "getActiveSessions(...)");
+                Iterator it = activeSessions.iterator();
+                while (true) {
+                    if (!it.hasNext()) {
+                        break;
+                    }
+                    Object next = it.next();
+                    if (Intrinsics.areEqual(((MediaController) next).getPackageName(), islandNotification.getPkg())) {
+                        obj = next;
+                        break;
+                    }
+                }
+                MediaController mediaController = (MediaController) obj;
+                if (mediaController != null && (metadata = mediaController.getMetadata()) != null) {
+                    long j = metadata.getLong("android.media.metadata.DURATION");
+                    if (j > 0) {
+                        long j2 = (long) (((float) j) * f);
+                        mediaController.getTransportControls().seekTo(j2);
+                        if (islandController.getVERBOSE()) {
+                            Log.i("ColorIsland", "seekNotification: pkg=" + islandNotification.getPkg() + " pct=" + ((int) (f * 100)) + " target=" + j2);
+                        }
+                    }
+                }
+            }
+            m5221constructorimpl = KResult.success(Unit.INSTANCE);
+        } catch (Throwable th) {
+            m5221constructorimpl = KResult.success(KResult.createFailure(th));
+        }
+        Throwable m5224exceptionOrNullimpl = KResult.exceptionOrNullimpl(m5221constructorimpl);
+        if (m5224exceptionOrNullimpl != null) {
+            Log.w("ColorIsland", "seekNotification failed: " + m5224exceptionOrNullimpl.getClass().getSimpleName());
+        }
+    }
+
+    private final void setExpanded(boolean value) {
+        if ((current == null && currentStatus == null) || expanded == value) {
+            return;
+        }
+        expanded = value;
+        IslandWindow islandWindow = window;
+        if (islandWindow != null) {
+            islandWindow.setExpanded(value);
+        }
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public static final void showDispatched$lambda$39(IslandNotification islandNotification, long j) {
+        Object m5221constructorimpl;
+        IslandController islandController = INSTANCE;
+        try {
+            if (IslandConfig.INSTANCE.getMasterEnabled()) {
+                if (currentStatus == null) {
+                    if (dispatchActive) {
+                        IslandNotification islandNotification2 = current;
+                        if (Intrinsics.areEqual(islandNotification2 != null ? islandNotification2.getKey() : null, islandNotification.getKey())) {
+                            IslandWindow islandWindow = window;
+                            if (islandWindow != null) {
+                                islandWindow.bind(islandNotification, expanded);
+                            }
+                            islandController.rescheduleDispatchHide(j);
+                        }
+                    }
+                    islandController.cancelTimers();
+                    IslandNotification islandNotification3 = current;
+                    if (islandNotification3 != null && !StringUtils.startsWith(islandNotification3.getKey(), "dispatch:")) {
+                        queue.addFirst(islandNotification3);
+                    }
+                    current = islandNotification;
+                    dispatchActive = true;
+                    expanded = false;
+                    IslandWindow islandWindow2 = window;
+                    if (islandWindow2 != null) {
+                        islandWindow2.show(islandNotification, false);
+                    }
+                    islandController.rescheduleDispatchHide(j);
+                    if (islandController.getVERBOSE()) {
+                        Log.i("ColorIsland", "showDispatched: key=" + islandNotification.getKey() + " title=" + islandNotification.getTitle() + " timeout=" + j);
+                    }
+                } else if (islandController.getVERBOSE()) {
+                    Log.d("ColorIsland", "showDispatched skipped: system status active");
+                }
+            }
+            m5221constructorimpl = KResult.success(Unit.INSTANCE);
+        } catch (Throwable th) {
+            m5221constructorimpl = KResult.success(KResult.createFailure(th));
+        }
+        Throwable m5224exceptionOrNullimpl = KResult.exceptionOrNullimpl(m5221constructorimpl);
+        if (m5224exceptionOrNullimpl != null) {
+            Log.w("ColorIsland", "showDispatched failed: " + m5224exceptionOrNullimpl.getMessage());
+        }
+    }
+
+    private final void showNext() {
+        cancelTimers();
+        IslandNotification removeFirstOrNull = queue.removeFirstOrNull();
+        if (removeFirstOrNull == null) {
+            current = null;
+            dismissIsland();
+            return;
+        }
+        current = removeFirstOrNull;
+        expanded = false;
+        IslandWindow islandWindow = window;
+        if (islandWindow != null) {
+            islandWindow.show(removeFirstOrNull, false);
+        }
+        if (IslandConfig.INSTANCE.getAutoExpand()) {
+            mainHandler.postDelayed(expandRunnable, EXPAND_DELAY_MS);
+        }
+        scheduleHide();
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public static final void showNextRunnable$lambda$4() {
+        INSTANCE.showNext();
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public static final void showSystemStatus$lambda$46(IslandSystemStatus islandSystemStatus) {
+        Object m5221constructorimpl;
+        int priorityOf;
+        int priorityOf2;
+        IslandController islandController = INSTANCE;
+        try {
+            if (IslandConfig.INSTANCE.getMasterEnabled()) {
+                if (IslandConfig.INSTANCE.isSystemStatusEnabled(islandSystemStatus.getType())) {
+                    IslandSystemStatus islandSystemStatus2 = currentStatus;
+                    if (islandSystemStatus2 != null && islandSystemStatus2.getType() == islandSystemStatus.getType() && Intrinsics.areEqual(islandSystemStatus2.getTitle(), islandSystemStatus.getTitle()) && islandSystemStatus2.getPersistent() == islandSystemStatus.getPersistent()) {
+                        if (islandController.getVERBOSE()) {
+                            Log.d("ColorIsland", "showSystemStatus dedup: " + islandSystemStatus.getType());
+                        }
+                    } else if (islandSystemStatus2 == null || islandSystemStatus2.getType() == islandSystemStatus.getType() || (priorityOf2 = IslandSystemStatus.INSTANCE.priorityOf(islandSystemStatus.getType())) >= (priorityOf = IslandSystemStatus.INSTANCE.priorityOf(islandSystemStatus2.getType()))) {
+                        if (islandController.getVERBOSE()) {
+                            Log.i("ColorIsland", "showSystemStatus: " + islandSystemStatus.getType() + " title=" + islandSystemStatus.getTitle() + " persistent=" + islandSystemStatus.getPersistent() + " cfgPersistent=" + IslandConfig.INSTANCE.getSystemStatusPersistent());
+                        }
+                        final IslandNotification islandNotification = current;
+                        if (islandNotification != null) {
+                            ArrayDeque<IslandNotification> arrayDeque = queue;
+                            CollectionsKt.removeAll((List) arrayDeque, new Function1() { // from class: io.github.colorisland.island.IslandController$$ExternalSyntheticLambda16
+                                @Override // kotlin.jvm.functions.Function1
+                                public final Object invoke(Object obj) {
+                                    boolean showSystemStatus$lambda$46$lambda$44$lambda$43$lambda$42;
+                                    showSystemStatus$lambda$46$lambda$44$lambda$43$lambda$42 = IslandController.showSystemStatus$lambda$46$lambda$44$lambda$43$lambda$42(islandNotification, (IslandNotification) obj);
+                                    return Boolean.valueOf(showSystemStatus$lambda$46$lambda$44$lambda$43$lambda$42);
+                                }
+                            });
+                            arrayDeque.addFirst(islandNotification);
+                            current = null;
+                            expanded = false;
+                            islandController.cancelTimers();
+                        }
+                        currentStatus = islandSystemStatus;
+                        expanded = false;
+                        Handler handler = mainHandler;
+                        Runnable runnable = statusHideRunnable;
+                        handler.removeCallbacks(runnable);
+                        IslandWindow islandWindow = window;
+                        if (islandWindow != null) {
+                            islandWindow.showStatus(islandSystemStatus, false);
+                        }
+                        if (!islandSystemStatus.getPersistent()) {
+                            handler.postDelayed(runnable, islandSystemStatus.getDurationMs());
+                        }
+                    } else if (islandController.getVERBOSE()) {
+                        Log.d("ColorIsland", "showSystemStatus preempted: " + islandSystemStatus.getType() + "(" + priorityOf2 + ") < " + islandSystemStatus2.getType() + "(" + priorityOf + ")");
+                    }
+                } else if (islandController.getVERBOSE()) {
+                    Log.d("ColorIsland", "showSystemStatus skipped: " + islandSystemStatus.getType() + " disabled");
+                }
+            }
+            m5221constructorimpl = KResult.success(Unit.INSTANCE);
+        } catch (Throwable th) {
+            m5221constructorimpl = KResult.success(KResult.createFailure(th));
+        }
+        Throwable m5224exceptionOrNullimpl = KResult.exceptionOrNullimpl(m5221constructorimpl);
+        if (m5224exceptionOrNullimpl != null) {
+            Log.e("ColorIsland", "showSystemStatus failed", m5224exceptionOrNullimpl);
+        }
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public static final boolean showSystemStatus$lambda$46$lambda$44$lambda$43$lambda$42(IslandNotification islandNotification, IslandNotification it) {
+        Intrinsics.checkNotNullParameter(it, "it");
