@@ -435,7 +435,6 @@ public final class IslandConfig {
             return true;
         }
         int i = WhenMappings.$EnumSwitchMapping$0[type.ordinal()];
-
         if (i == 1) {
             str = "sys_status_flashlight";
         } else if (i == 2) {
