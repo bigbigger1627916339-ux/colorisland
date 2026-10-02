@@ -1,0 +1,535 @@
+package io.github.colorisland.island;
+
+import io.github.colorisland.util.StringUtils;
+
+import android.app.Notification;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
+import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CameraManager;
+import android.media.MediaMetadata;
+import android.media.session.MediaController;
+import android.media.session.MediaSessionManager;
+import android.net.ConnectivityManager;
+import android.net.wifi.WifiManager;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.service.notification.StatusBarNotification;
+import android.util.Log;
+import android.util.LruCache;
+import androidx.core.app.NotificationCompat;
+import io.github.colorisland.IslandConfig;
+import io.github.colorisland.island.IslandSystemStatus;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import kotlin.Metadata;
+import io.github.colorisland.util.KResult;
+import kotlin.Unit;
+import kotlin.collections.ArrayDeque;
+import kotlin.collections.CollectionsKt;
+import kotlin.jvm.functions.Function0;
+import kotlin.jvm.functions.Function1;
+import kotlin.jvm.functions.Function2;
+import kotlin.jvm.internal.Intrinsics;
+import kotlin.text.StringsKt;
+
+/* compiled from: IslandController.kt */
+/* loaded from: classes3.dex */
+public final class IslandController {
+    private static final long COMPACT_HOLD_MS = 700;
+    private static final long EXPAND_DELAY_MS = 350;
+    private static final int MAX_QUEUE = 16;
+    private static final long NEXT_DELAY_MS = 250;
+    private static final String TAG = "ColorIsland";
+    private static Context appContext;
+    private static volatile Function1<? super StatusBarNotification, Unit> cancelSystemNotification;
+    private static IslandNotification current;
+    private static IslandSystemStatus currentStatus;
+    private static volatile boolean dispatchActive;
+    private static boolean expanded;
+    private static volatile boolean flashlightEnabled;
+    private static volatile boolean hotspotEnabled;
+    private static long initWallTimeMs;
+    private static volatile boolean initialized;
+    private static volatile Function1<? super StatusBarNotification, Unit> restoreSystemNotification;
+    private static volatile SystemStatusMonitor statusMonitor;
+    private static volatile Function2<? super IslandSystemStatus.Type, ? super Boolean, Unit> statusSink;
+    private static volatile String torchCameraId;
+    private static IslandWindow window;
+    public static final IslandController INSTANCE = new IslandController();
+    private static final Handler mainHandler = new Handler(Looper.getMainLooper());
+    private static final ExecutorService ioExecutor = Executors.newSingleThreadExecutor();
+    private static final ArrayDeque<IslandNotification> queue = new ArrayDeque<>();
+    private static final Map<String, String> trackedKeys = new LinkedHashMap();
+    private static final LruCache<String, AppMeta> appMetaCache = new LruCache<>(128);
+    private static final List<StatusBarNotification> takenOver = new ArrayList();
+    private static final Set<String> selfCancelled = new LinkedHashSet();
+    private static final Set<String> selfRestored = new LinkedHashSet();
+    private static final Runnable expandRunnable = new Runnable() { // from class: io.github.colorisland.island.IslandController$$ExternalSyntheticLambda18
+        @Override // java.lang.Runnable
+        public final void run() {
+            IslandController.expandRunnable$lambda$0();
+        }
+    };
+    private static final Runnable collapseRunnable = new Runnable() { // from class: io.github.colorisland.island.IslandController$$ExternalSyntheticLambda19
+        @Override // java.lang.Runnable
+        public final void run() {
+            IslandController.collapseRunnable$lambda$1();
+        }
+    };
+    private static final Runnable hideRunnable = new Runnable() { // from class: io.github.colorisland.island.IslandController$$ExternalSyntheticLambda20
+        @Override // java.lang.Runnable
+        public final void run() {
+            IslandController.hideRunnable$lambda$2();
+        }
+    };
+    private static final Runnable dispatchHideRunnable = new Runnable() { // from class: io.github.colorisland.island.IslandController$$ExternalSyntheticLambda21
+        @Override // java.lang.Runnable
+        public final void run() {
+            IslandController.dispatchHideRunnable$lambda$3();
+        }
+    };
+    private static final Runnable showNextRunnable = new Runnable() { // from class: io.github.colorisland.island.IslandController$$ExternalSyntheticLambda23
+        @Override // java.lang.Runnable
+        public final void run() {
+            IslandController.showNextRunnable$lambda$4();
+        }
+    };
+    private static final Runnable statusHideRunnable = new Runnable() { // from class: io.github.colorisland.island.IslandController$$ExternalSyntheticLambda24
+        @Override // java.lang.Runnable
+        public final void run() {
+            IslandController.statusHideRunnable$lambda$5();
+        }
+    };
+    public static final int $stable = 8;
+
+    /* JADX INFO: Access modifiers changed from: private */
+    /* compiled from: IslandController.kt */
+    /* loaded from: classes3.dex */
+    public static final class AppMeta {
+        private final Drawable.ConstantState iconState;
+        private final boolean isSystem;
+        private final String label;
+
+        public AppMeta(String label, Drawable.ConstantState constantState, boolean z) {
+            Intrinsics.checkNotNullParameter(label, "label");
+            this.label = label;
+            this.iconState = constantState;
+            this.isSystem = z;
+        }
+
+        public final Drawable.ConstantState getIconState() {
+            return this.iconState;
+        }
+
+        public final String getLabel() {
+            return this.label;
+        }
+
+        /** 是否为系统应用（接管系统通知时使用）。 */
+        public final boolean isSystem() {
+            return this.isSystem;
+        }
+    }
+
+    /* compiled from: IslandController.kt */
+    /* loaded from: classes3.dex */
+    public /* synthetic */ class WhenMappings {
+        public static final /* synthetic */ int[] $EnumSwitchMapping$0;
+
+        static {
+            int[] iArr = new int[IslandSystemStatus.Type.values().length];
+            try {
+                iArr[IslandSystemStatus.Type.FLASHLIGHT.ordinal()] = 1;
+            } catch (NoSuchFieldError unused) {
+            }
+            try {
+                iArr[IslandSystemStatus.Type.HOTSPOT.ordinal()] = 2;
+            } catch (NoSuchFieldError unused2) {
+            }
+            $EnumSwitchMapping$0 = iArr;
+        }
+    }
+
+    private IslandController() {
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public static final void cancelDispatched$lambda$41(String str) {
+        final String str2 = "dispatch:" + str;
+        CollectionsKt.removeAll((List) queue, new Function1() { // from class: io.github.colorisland.island.IslandController$$ExternalSyntheticLambda13
+            @Override // kotlin.jvm.functions.Function1
+            public final Object invoke(Object obj) {
+                boolean cancelDispatched$lambda$41$lambda$40;
+                cancelDispatched$lambda$41$lambda$40 = IslandController.cancelDispatched$lambda$41$lambda$40(str2, (IslandNotification) obj);
+                return Boolean.valueOf(cancelDispatched$lambda$41$lambda$40);
+            }
+        });
+        if (dispatchActive) {
+            IslandNotification islandNotification = current;
+            if (Intrinsics.areEqual(islandNotification != null ? islandNotification.getKey() : null, str2)) {
+                INSTANCE.hideDispatched();
+            }
+        }
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public static final boolean cancelDispatched$lambda$41$lambda$40(String str, IslandNotification it) {
+        Intrinsics.checkNotNullParameter(it, "it");
+        return Intrinsics.areEqual(it.getKey(), str);
+    }
+
+    private final void cancelTimers() {
+        Handler handler = mainHandler;
+        handler.removeCallbacks(expandRunnable);
+        handler.removeCallbacks(collapseRunnable);
+        handler.removeCallbacks(hideRunnable);
+        handler.removeCallbacks(showNextRunnable);
+        handler.removeCallbacks(statusHideRunnable);
+        handler.removeCallbacks(dispatchHideRunnable);
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public static final void collapseRunnable$lambda$1() {
+        INSTANCE.setExpanded(false);
+    }
+
+    private final boolean detectSystemStatusEnabled(StatusBarNotification sbn) {
+        String notificationText = notificationText(sbn);
+        List listOf = CollectionsKt.listOf((Object[]) new String[]{"关闭", "已关闭", "停止", "结束", "断开", "禁用"});
+        if ((listOf instanceof Collection) && listOf.isEmpty()) {
+            return true;
+        }
+        Iterator it = listOf.iterator();
+        while (it.hasNext()) {
+            if (StringUtils.contains(notificationText, (CharSequence) it.next())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private final IslandSystemStatus.Type detectSystemStatusNotification(StatusBarNotification sbn) {
+        String notificationText = notificationText(sbn);
+        if (StringUtils.contains(notificationText, "热点")) {
+            return IslandSystemStatus.Type.HOTSPOT;
+        }
+        if (StringUtils.contains(notificationText, "录屏") || StringUtils.contains(notificationText, "屏幕录制")) {
+            return IslandSystemStatus.Type.SCREEN_RECORD;
+        }
+        return null;
+    }
+
+    private final void dismissDisabledStatus() {
+        mainHandler.post(new Runnable() { // from class: io.github.colorisland.island.IslandController$$ExternalSyntheticLambda9
+            @Override // java.lang.Runnable
+            public final void run() {
+                IslandController.dismissDisabledStatus$lambda$49();
+            }
+        });
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public static final void dismissDisabledStatus$lambda$49() {
+        IslandSystemStatus islandSystemStatus = currentStatus;
+        if (islandSystemStatus == null || IslandConfig.INSTANCE.isSystemStatusEnabled(islandSystemStatus.getType())) {
+            return;
+        }
+        IslandController islandController = INSTANCE;
+        if (islandController.getVERBOSE()) {
+            Log.d("ColorIsland", "dismissDisabledStatus: " + islandSystemStatus.getType() + " switch turned off");
+        }
+        islandController.hideSystemStatus();
+    }
+
+    private final void dismissIsland() {
+        cancelTimers();
+        IslandWindow islandWindow = window;
+        if (islandWindow != null) {
+            islandWindow.hide();
+        }
+        restoreTakenOver();
+        if (!queue.isEmpty()) {
+            mainHandler.postDelayed(showNextRunnable, NEXT_DELAY_MS);
+        }
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public static final void dispatchHideRunnable$lambda$3() {
+        INSTANCE.hideDispatched();
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public static final void expandRunnable$lambda$0() {
+        INSTANCE.setExpanded(true);
+    }
+
+    private final String findTorchCameraId(CameraManager cm) {
+        Object m5221constructorimpl;
+        String[] cameraIdList;
+        try {
+            cameraIdList = cm.getCameraIdList();
+        } catch (CameraAccessException e) {
+            return null;
+        }
+        int length = cameraIdList.length;
+        int i = 0;
+        while (true) {
+            if (i >= length) {
+                return null;
+            }
+            String str = cameraIdList[i];
+            try {
+                IslandController islandController = this;
+                Object obj = cm.getCameraCharacteristics(str).get(CameraCharacteristics.FLASH_INFO_AVAILABLE);
+                m5221constructorimpl = KResult.success(obj instanceof Boolean ? (Boolean) obj : null);
+            } catch (Throwable th) {
+                m5221constructorimpl = KResult.success(KResult.createFailure(th));
+            }
+            Boolean bool = (Boolean) (KResult.isFailureimpl(m5221constructorimpl) ? null : m5221constructorimpl);
+            if (bool != null && bool.booleanValue()) {
+                return str;
+            }
+            i++;
+        }
+    }
+
+    private final boolean getVERBOSE() {
+        return IslandConfig.INSTANCE.getDebugLog();
+    }
+
+    private final void handlePosted(final StatusBarNotification sbn) {
+        if (getVERBOSE()) {
+            Log.d("ColorIsland", "handlePosted: " + sbn.getPackageName() + " key=" + sbn.getKey());
+        }
+        if (!IslandConfig.INSTANCE.getMasterEnabled()) {
+            if (getVERBOSE()) {
+                Log.w("ColorIsland", "handlePosted skipped: masterEnabled=false");
+                return;
+            }
+            return;
+        }
+        if (selfRestored.remove(sbn.getKey())) {
+            if (getVERBOSE()) {
+                Log.d("ColorIsland", "handlePosted skipped: self restored");
+                return;
+            }
+            return;
+        }
+        IslandSystemStatus.Type detectSystemStatusNotification = detectSystemStatusNotification(sbn);
+        if (detectSystemStatusNotification != null) {
+            boolean detectSystemStatusEnabled = detectSystemStatusEnabled(sbn);
+            if (getVERBOSE()) {
+                Log.d("ColorIsland", "handlePosted -> forward system status " + detectSystemStatusNotification + "=" + detectSystemStatusEnabled);
+            }
+            Function2<? super IslandSystemStatus.Type, ? super Boolean, Unit> function2 = statusSink;
+            if (function2 != null) {
+                function2.invoke(detectSystemStatusNotification, Boolean.valueOf(detectSystemStatusEnabled));
+                return;
+            }
+            return;
+        }
+        if (isFlashlightNotification(sbn)) {
+            if (getVERBOSE()) {
+                Log.d("ColorIsland", "handlePosted skipped: flashlight notification");
+                return;
+            }
+            return;
+        }
+        if (initWallTimeMs > 0 && sbn.getPostTime() < initWallTimeMs - 2000) {
+            if (getVERBOSE()) {
+                Log.d("ColorIsland", "handlePosted skipped: 历史通知 postTime=" + sbn.getPostTime() + " init=" + initWallTimeMs);
+                return;
+            }
+            return;
+        }
+        final Notification notification = sbn.getNotification();
+        if (notification == null) {
+            return;
+        }
+        int i = notification.flags;
+        if (IslandConfig.INSTANCE.getHideGroupSummary() && (i & 512) != 0) {
+            if (getVERBOSE()) {
+                Log.d("ColorIsland", "handlePosted skipped: group summary");
+                return;
+            }
+            return;
+        }
+        boolean isCall = isCallNotification(sbn);
+        if (IslandConfig.INSTANCE.getHideOngoing() && (i & 2) != 0 && !isCall) {
+            if (getVERBOSE()) {
+                Log.d("ColorIsland", "handlePosted skipped: ongoing");
+                return;
+            }
+            return;
+        }
+        IslandConfig islandConfig = IslandConfig.INSTANCE;
+        String packageName = sbn.getPackageName();
+        Intrinsics.checkNotNullExpressionValue(packageName, "getPackageName(...)");
+        if (!islandConfig.isAppEnabled(packageName)) {
+            if (getVERBOSE()) {
+                Log.d("ColorIsland", "handlePosted skipped: app disabled");
+                return;
+            }
+            return;
+        }
+        Context context = appContext;
+        if (context == null) {
+            return;
+        }
+        ChannelRegistry.INSTANCE.observe(context, sbn);
+        ChannelRegistry.INSTANCE.persistIfNeeded();
+        IslandConfig islandConfig2 = IslandConfig.INSTANCE;
+        String packageName2 = sbn.getPackageName();
+        Intrinsics.checkNotNullExpressionValue(packageName2, "getPackageName(...)");
+        if (!islandConfig2.isChannelEnabled(packageName2, notification.getChannelId())) {
+            if (getVERBOSE()) {
+                Log.d("ColorIsland", "handlePosted skipped: channel disabled ch=" + notification.getChannelId());
+                return;
+            }
+            return;
+        }
+        final PackageManager packageManager = context.getPackageManager();
+        AppMeta appMeta = appMetaCache.get(sbn.getPackageName());
+        if (appMeta != null) {
+            handlePostedWithMeta(sbn, notification, appMeta);
+        } else {
+            final String packageName3 = sbn.getPackageName();
+            ioExecutor.execute(new Runnable() { // from class: io.github.colorisland.island.IslandController$$ExternalSyntheticLambda17
+                @Override // java.lang.Runnable
+                public final void run() {
+                    IslandController.handlePosted$lambda$20(packageName3, packageManager, sbn, notification);
+                }
+            });
+        }
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public static final void handlePosted$lambda$20(String str, PackageManager packageManager, final StatusBarNotification statusBarNotification, final Notification notification) {
+        Object m5221constructorimpl;
+        Object m5221constructorimpl2;
+        Object m5221constructorimpl3;
+        try {
+            m5221constructorimpl = KResult.success(packageManager.getApplicationInfo(str, 0));
+        } catch (Throwable th) {
+            m5221constructorimpl = KResult.success(KResult.createFailure(th));
+        }
+        if (KResult.isFailureimpl(m5221constructorimpl)) {
+            m5221constructorimpl = null;
+        }
+        ApplicationInfo applicationInfo = (ApplicationInfo) m5221constructorimpl;
+        if (applicationInfo == null) {
+            return;
+        }
+        try {
+            m5221constructorimpl2 = KResult.success(packageManager.getApplicationLabel(applicationInfo).toString());
+        } catch (Throwable th2) {
+            m5221constructorimpl2 = KResult.success(KResult.createFailure(th2));
+        }
+        if (KResult.isFailureimpl(m5221constructorimpl2)) {
+            m5221constructorimpl2 = str;
+        }
+        String str2 = (String) m5221constructorimpl2;
+        try {
+            m5221constructorimpl3 = KResult.success(packageManager.getApplicationIcon(applicationInfo));
+        } catch (Throwable th3) {
+            m5221constructorimpl3 = KResult.success(KResult.createFailure(th3));
+        }
+        if (KResult.isFailureimpl(m5221constructorimpl3)) {
+            m5221constructorimpl3 = null;
+        }
+        Drawable drawable = (Drawable) m5221constructorimpl3;
+        Drawable.ConstantState constantState = drawable != null ? drawable.getConstantState() : null;
+        Intrinsics.checkNotNull(str2);
+        final AppMeta appMeta = new AppMeta(str2, constantState, INSTANCE.isSystemApp(applicationInfo));
+        appMetaCache.put(str, appMeta);
+        mainHandler.post(new Runnable() { // from class: io.github.colorisland.island.IslandController$$ExternalSyntheticLambda29
+            @Override // java.lang.Runnable
+            public final void run() {
+                IslandController.handlePosted$lambda$20$lambda$19(statusBarNotification, notification, appMeta);
+            }
+        });
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public static final void handlePosted$lambda$20$lambd
+    /* JADX WARN: Removed duplicated region for block: B:18:0x0041  */
+    /* JADX WARN: Removed duplicated region for block: B:9:0x0023  */
+    /*
+        Code decompiled incorrectly, please refer to instructions dump.
+        To view partially-correct add '--show-bad-code' argument
+    */
+        /**
+     * 通知到达后的核心处理（v1.0 smali handlePostedWithMeta 逐条翻译）。
+     *
+     * 流程：确定应用图标 → from() 构造岛通知 → trackedKeys 记账并按包计数 →
+     * 更新 groupCount → 同 key 直接 rebind / 同包更新 current / 队列同 key 替换 /
+     * 队列同包替换 / 入队（上限 16，溢出淘汰最旧）→ 系统应用接管 → 空闲时 showNext。
+     *
+     * 注意：copy$default 的 mask 语义与本 APK 字节码一致——bit=1 用 this 原值，bit=0 用传入值，
+     * 因此 0x1FFF（bit0-12）表示保留前 13 个字段、仅替换 groupCount（bit13）。
+     */
+    private final void handlePostedWithMeta(StatusBarNotification sbn, Notification notification, AppMeta meta) {
+        String label = meta.getLabel();
+        // 1) 应用图标：同一 key 正在展示时复用其图标，否则用 AppMeta 缓存的 ConstantState 重建
+        Drawable appIcon = null;
+        IslandNotification cur = current;
+        if (cur != null && Intrinsics.areEqual(cur.getKey(), sbn.getKey())) {
+            appIcon = cur.getAppIcon();
+        }
+        if (appIcon == null) {
+            Drawable.ConstantState iconState = meta.getIconState();
+            appIcon = iconState != null ? iconState.newDrawable() : null;
+        }
+        // 2) 构造岛通知对象（from 可能因解析失败返回 null）
+        IslandNotification island = IslandNotification.INSTANCE.from(sbn, label, appIcon);
+        if (island == null) {
+            Log.w("ColorIsland", "handlePosted skipped: IslandNotification.from returned null");
+            return;
+        }
+        // 3) trackedKeys 记账（key → pkg，保留首次记录），并统计同包通知数作为 groupCount
+        trackedKeys.putIfAbsent(sbn.getKey(), sbn.getPackageName());
+        int groupCount = 0;
+        for (String trackedPkg : trackedKeys.values()) {
+            if (Intrinsics.areEqual(trackedPkg, sbn.getPackageName())) {
+                groupCount++;
+            }
+        }
+        // 4) 仅替换 groupCount，其余字段保留 from() 解析结果
+        IslandNotification updated = IslandNotification.copy$default(island,
+                null, null, null, null, null, null, 0L, null, null, null, 0, false, null,
+                groupCount, 0x1FFF, null);
+        if (getVERBOSE()) {
+            Log.i("ColorIsland", "handlePosted -> show island for " + updated.getPkg()
+                    + " title=" + updated.getTitle() + " groupCount=" + updated.getGroupCount());
+        }
+        // 5) 与当前展示同 key：直接 rebind（不重排队列）
+        String currentKey = current != null ? current.getKey() : null;
+        if (Intrinsics.areEqual(currentKey, updated.getKey())) {
+            IslandWindow w = window;
+            if (w != null) {
+                w.bind(updated, expanded);
+            }
+            return;
+        }
+        // 6) 与当前展示同包：更新 current 的 groupCount 后 rebind
+        if (current != null && Intrinsics.areEqual(current.getPkg(), updated.getPkg())) {
+            IslandNotification newCurrent = IslandNotification.copy$default(current,
+                    null, null, null, null, null, null, 0L, null, null, null, 0, false, null,
+                    updated.getGroupCount(), 0x1FFF, null);
