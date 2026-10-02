@@ -127,7 +127,3 @@ public final class SystemStatusMonitor {
         IslandController.INSTANCE.showSystemStatus(new IslandSystemStatus(drawable, title, text, durationMs, persistent, type, statusSourceLabel(), connInfo));
         return true;
     }
-
-    static /* synthetic */ boolean emitStatus$default(SystemStatusMonitor systemStatusMonitor, IslandSystemStatus.Type type, int i, String str, String str2, long j, boolean z, String str3, int i2, Object obj) {
-        return systemStatusMonitor.emitStatus(type, i, str, str2, j, z, (i2 & 64) != 0 ? "" : str3);
-    }
