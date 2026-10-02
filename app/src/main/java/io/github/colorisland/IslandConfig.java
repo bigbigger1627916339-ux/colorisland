@@ -139,6 +139,34 @@ public final class IslandConfig {
         INSTANCE.reload();
     }
 
+    /* JADX WARN: Can't wrap try/catch for region: R(18:5|(18:6|7|(1:9)|10|(2:13|11)|14|15|(4:18|(3:20|21|22)(1:24)|23|16)|25|26|(1:28)(1:112)|29|(2:32|30)|33|34|(4:37|(3:39|40|41)(1:43)|42|35)|44|45)|46|(8:95|(2:97|(2:98|(3:100|(3:102|103|104)(3:106|107|(1:109))|105)(1:110)))(0)|54|(4:82|83|(1:85)(1:88)|86)|56|(4:73|74|(1:76)(1:79)|77)|60|(5:62|63|(1:65)|66|68)(1:72))|49|50|(1:52)(1:92)|53|54|(0)|56|(1:58)|73|74|(0)(0)|77|60|(0)(0)) */
+    /* JADX WARN: Code restructure failed: missing block: B:80:0x0316, code lost:
+    
+        r0 = move-exception;
+     */
+    /* JADX WARN: Code restructure failed: missing block: B:81:0x0317, code lost:
+    
+        r2 = kotlin.Result.INSTANCE;
+        kotlin.KResult.success(kotlin.KResult.createFailure(r0));
+     */
+    /* JADX WARN: Code restructure failed: missing block: B:93:0x02c3, code lost:
+    
+        r0 = move-exception;
+     */
+    /* JADX WARN: Code restructure failed: missing block: B:94:0x02c4, code lost:
+    
+        r2 = kotlin.Result.INSTANCE;
+        kotlin.KResult.success(kotlin.KResult.createFailure(r0));
+     */
+    /* JADX WARN: Removed duplicated region for block: B:62:0x0324 A[EXC_TOP_SPLITTER, SYNTHETIC] */
+    /* JADX WARN: Removed duplicated region for block: B:72:? A[RETURN, SYNTHETIC] */
+    /* JADX WARN: Removed duplicated region for block: B:76:0x030b A[Catch: all -> 0x0316, TryCatch #1 {all -> 0x0316, blocks: (B:74:0x0301, B:76:0x030b, B:77:0x0312), top: B:73:0x0301 }] */
+    /* JADX WARN: Removed duplicated region for block: B:79:0x0311  */
+    /* JADX WARN: Removed duplicated region for block: B:82:0x02d4 A[EXC_TOP_SPLITTER, SYNTHETIC] */
+    /*
+        Code decompiled incorrectly, please refer to instructions dump.
+        To view partially-correct add '--show-bad-code' argument
+    */
     /**
      * 从（可能为跨进程远程的）SharedPreferences 重载全部配置。
      *
@@ -407,6 +435,7 @@ public final class IslandConfig {
             return true;
         }
         int i = WhenMappings.$EnumSwitchMapping$0[type.ordinal()];
+
         if (i == 1) {
             str = "sys_status_flashlight";
         } else if (i == 2) {
@@ -447,7 +476,7 @@ public final class IslandConfig {
     }
 
     public final void setStatusFlags(Map<String, Boolean> map) {
-        Intrinsics.checkNotNullParameter(map, "setter");
+        Intrinsics.checkNotNullParameter(map, "<set-?>");
         statusFlags = map;
     }
 }
