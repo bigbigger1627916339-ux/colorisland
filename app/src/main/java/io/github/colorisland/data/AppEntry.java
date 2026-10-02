@@ -45,7 +45,7 @@ public final /* data */ class AppEntry {
 
     /* renamed from: component2, reason: from getter */
     public final String component2() {
-        return this.name;
+        return this.label;
     }
 
     /* renamed from: component3, reason: from getter */
