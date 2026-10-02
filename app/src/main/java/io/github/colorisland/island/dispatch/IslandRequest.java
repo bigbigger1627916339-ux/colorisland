@@ -190,7 +190,7 @@ public final /* data */ class IslandRequest {
 
     /* renamed from: component3, reason: from getter */
     public final String component3() {
-        return this.title;
+        return this.text;
     }
 
     /* renamed from: component4, reason: from getter */
