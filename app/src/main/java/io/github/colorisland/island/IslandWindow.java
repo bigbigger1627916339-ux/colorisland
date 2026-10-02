@@ -309,7 +309,7 @@ public final class IslandWindow implements IslandView.Listener {
         setTouchable(false);
         islandView.animateOut(new Function0() { // from class: io.github.colorisland.island.IslandWindow$$ExternalSyntheticLambda1
             @Override // kotlin.jvm.functions.Function0
-            public final Object invoke(Object obj) {
+            public final Object invoke() {
                 Unit hide$lambda$11;
                 hide$lambda$11 = IslandWindow.hide$lambda$11(IslandWindow.this, frameLayout);
                 return hide$lambda$11;
