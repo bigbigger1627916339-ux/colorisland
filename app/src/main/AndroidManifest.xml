@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- 获取已安装应用列表（应用页展示） -->
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+    <!-- 通知权限（Android 13+） -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- 岛屿广播 API 自定义权限（signature 级，仅同签名应用可调用） -->
+    <permission
+        android:name="io.github.colorisland.permission.SEND_ISLAND"
+        android:protectionLevel="signature" />
+    <permission
+        android:name="io.github.colorisland.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+        android:protectionLevel="signature" />
+    <uses-permission android:name="io.github.colorisland.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+
+    <application
+        android:name="io.github.colorisland.ConfigSyncApp"
+        android:allowBackup="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.ColorIsland"
+        tools:targetApi="34">
+
+        <activity
+            android:name="io.github.colorisland.MainActivity"
+            android:configChanges="keyboardHidden|orientation|screenLayout|screenSize|uiMode"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.ColorIsland">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+                <!-- LSPosed 模块管理入口 -->
+                <category android:name="de.robv.android.xposed.category.MODULE_SETTINGS" />
+            </intent-filter>
+        </activity>
+
+        <!-- libxposed 服务提供者（模块与 SystemUI 侧通信） -->
+        <provider
+            android:name="io.github.libxposed.service.XposedProvider"
+            android:authorities="io.github.colorisland.XposedService"
+            android:exported="true" />
+    </application>
+</manifest>

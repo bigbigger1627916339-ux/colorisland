@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ColorIsland 品牌渐变：绿 → 青 → 蓝（从原始 APK resources.arsc 提取）
+     原始资源名为 $ic_launcher_background__0（jadx/apktool 解码产物），此处重命名为合法资源名 -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <gradient
+        android:type="linear"
+        android:startX="0"
+        android:startY="0"
+        android:endX="108"
+        android:endY="108">
+        <item android:offset="0.0" android:color="#FF00E08C" />
+        <item android:offset="0.55" android:color="#FF00B8A9" />
+        <item android:offset="1.0" android:color="#FF0091EA" />
+    </gradient>
+</shape>

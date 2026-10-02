@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Adaptive Icon 背景层（v1.0 缺陷修复）。
+
+  缺陷根因（返回桌面图标"黑变白"闪烁）：
+  原写法为 <path android:fillColor="@drawable/ic_launcher_gradient" .../>，
+  即用一个 <gradient> shape drawable 作为 VectorDrawable path 的填充色。
+  VectorDrawable 的 fillColor 只接受颜色值或 @color 资源，不接受 @drawable 引用；
+  经 AAPT2 重新编译后，运行时 VectorDrawable 解析该引用失败，渐变填充 path
+  退化为透明，仅剩第二条"顶部白色波浪"path 生效，图标背景因此露出桌面浅色
+  底板（表现为截图里的"浅蓝云朵"+ 黑胶囊），返回桌面重绘时即"闪一下黑变白"。
+
+  修复：将渐变改为 VectorDrawable 原生内联 <gradient>（API 24+，minSdk 33 支持），
+  不再依赖非法 fillColor 引用，背景渐变可稳定渲染。色值与原版一致：
+  绿 #00E08C → 青 #00B8A9 → 蓝 #0091EA。
+-->
+<vector android:height="108.0dip" android:width="108.0dip" android:viewportWidth="108.0" android:viewportHeight="108.0"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <path android:pathData="M0,0h108v108h-108z">
+        <gradient android:type="linear" android:startX="0" android:startY="0" android:endX="108" android:endY="108">
+            <item android:offset="0.0" android:color="#FF00E08C" />
+            <item android:offset="0.55" android:color="#FF00B8A9" />
+            <item android:offset="1.0" android:color="#FF0091EA" />
+        </gradient>
+    </path>
+    <path android:fillColor="#33ffffff" android:pathData="M0,0 L108,0 L108,34 C78,52 30,52 0,34 Z" />
+</vector>

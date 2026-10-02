@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Adaptive Icon 入口（v26+，minSdk 33 全量支持）。
+  三层均引用 drawable/ 下的 VectorDrawable，无任何二进制 PNG 依赖。
+  替代原 mipmap-{m,h,xh,xxh,xxxh}dpi/ic_launcher.png 兜底位图。
+-->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@drawable/ic_launcher_background" />
+    <foreground android:drawable="@drawable/ic_launcher_foreground" />
+    <monochrome android:drawable="@drawable/ic_launcher_monochrome" />
+</adaptive-icon>

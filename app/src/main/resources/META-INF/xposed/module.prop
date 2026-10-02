@@ -1,0 +1,8 @@
+minApiVersion=102
+targetApiVersion=102
+staticScope=true
+name=ColorIsland
+description=ColorOS 14 灵动岛：自绘悬浮岛 + AOSP 通知 Hook，Miuix 风格界面。
+version=1.0.0
+versionCode=1
+author=ColorIsland
