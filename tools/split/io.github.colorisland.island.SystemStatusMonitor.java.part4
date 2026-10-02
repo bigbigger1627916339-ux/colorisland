@@ -70,19 +70,19 @@
             String ssid = ssidRef[0];
             String pwd = pwdRef[0];
             if (ssid != null && !ssid.trim().isEmpty()) {
-                sb.append("SSID：").append(ssid);
+                sb.append("SSID\uff1a").append(ssid);
             }
             if (pwd != null && !pwd.trim().isEmpty()) {
                 if (sb.length() > 0) {
-                    sb.append(" · ");
+                    sb.append(" \u00b7 ");
                 }
-                sb.append("密码：").append(pwd);
+                sb.append("\u5bc6\u7801\uff1a").append(pwd);
             }
             if (clients >= 0) {
                 if (sb.length() > 0) {
-                    sb.append(" · ");
+                    sb.append(" \u00b7 ");
                 }
-                sb.append("已连接 ").append(clients).append(" 台");
+                sb.append("\u5df2\u8fde\u63a5 ").append(clients).append(" \u53f0");
             }
             String result = sb.toString();
             boolean hasPwd = pwd != null && !pwd.trim().isEmpty();
