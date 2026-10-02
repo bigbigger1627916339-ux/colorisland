@@ -1,0 +1,13 @@
+                cameraManager.unregisterTorchCallback(torchCallback);
+                unit = Unit.INSTANCE;
+            }
+            m5221constructorimpl2 = KResult.success(unit);
+        } catch (Throwable th2) {
+            m5221constructorimpl2 = KResult.success(KResult.createFailure(th2));
+        }
+        Throwable m5224exceptionOrNullimpl2 = KResult.exceptionOrNullimpl(m5221constructorimpl2);
+        if (m5224exceptionOrNullimpl2 != null) {
+            Log.w(TAG, "unregisterTorchCallback failed: " + m5224exceptionOrNullimpl2.getMessage());
+        }
+    }
+}
