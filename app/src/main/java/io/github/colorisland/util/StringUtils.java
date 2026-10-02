@@ -75,6 +75,7 @@ public final class StringUtils {
             sb.append(item);
             first = false;
         }
+        }
         return sb.toString();
     }
 }
