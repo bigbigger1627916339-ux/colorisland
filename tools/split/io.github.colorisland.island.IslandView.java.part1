@@ -1,0 +1,532 @@
+package io.github.colorisland.island;
+
+import io.github.colorisland.util.StringUtils;
+
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.content.Context;
+import android.graphics.Color;
+import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
+import android.os.SystemClock;
+import android.text.TextUtils;
+import android.view.Display;
+import android.view.DisplayCutout;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewParent;
+import android.view.WindowManager;
+import android.view.animation.DecelerateInterpolator;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import androidx.core.app.NotificationCompat;
+import io.github.colorisland.IslandConfig;
+import io.github.colorisland.R;
+import io.github.colorisland.island.IslandSystemStatus;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import kotlin.Lazy;
+import kotlin.LazyKt;
+import kotlin.Metadata;
+import io.github.colorisland.util.KResult;
+import kotlin.Unit;
+import kotlin.collections.CollectionsKt;
+import kotlin.jvm.functions.Function0;
+import kotlin.jvm.functions.Function3;
+import kotlin.jvm.internal.Intrinsics;
+import kotlin.ranges.RangesKt;
+import kotlin.text.StringsKt;
+
+/* compiled from: IslandView.kt */
+/* loaded from: classes3.dex */
+public final class IslandView extends FrameLayout {
+    public static final float COMPACT_HEIGHT = 34.0f;
+    public static final float EXPANDED_RADIUS = 24.0f;
+    public static final float INDETERMINATE_CYCLE_MS = 480.0f;
+    private final LinearLayout actionsRow;
+    private final GradientDrawable bgDrawable;
+    private final ImageView compactIcon;
+    private final LinearLayout compactRoot;
+    private final ImageView compactToggle;
+    private int compactWidthPx;
+    private int cutoutBottomPx;
+    private final View cutoutSpacer;
+    private int cutoutWidthPx;
+    private final float density;
+    private long downTime;
+    private float downX;
+    private float downY;
+    private final TextView expAppName;
+    private final TextView expConnInfo;
+    private final LinearLayout expHeader;
+    private final ImageView expIcon;
+    private final TextView expMessages;
+    private final FrameLayout expProgressBar;
+    private final View expProgressFill;
+    private final View expProgressTrack;
+    private final TextView expSubText;
+    private final TextView expText;
+    private final TextView expTitle;
+    private final ImageView expToggle;
+    private boolean expanded;
+    private int expandedHeightPx;
+    private final LinearLayout expandedRoot;
+    private int expandedWidthPx;
+    private float indeterminatePhase;
+    private final Runnable indeterminateRunnable;
+    private boolean indeterminateRunning;
+    private List<String> lastBoundMessages;
+    private String lastBoundMessagesText;
+    private int lastIndeterminateChunk;
+    private long lastIndeterminateFrameMs;
+    private int layerAnimGeneration;
+    private Listener listener;
+    private int messageBubbleColor;
+
+    /* renamed from: moduleContext$delegate, reason: from kotlin metadata */
+    private final Lazy moduleContext;
+    private IslandNotification notif;
+    private int progressBarWidth;
+    private int progressHitBottom;
+    private int progressHitTop;
+    private final int screenWidth;
+    private boolean seeking;
+    private Function3<? super Integer, ? super Integer, ? super Boolean, Unit> sizeChangeListener;
+    private IslandSystemStatus status;
+    private boolean statusMode;
+    private int toggleHitBottom;
+    private int toggleHitLeft;
+    private int toggleHitRight;
+    private int toggleHitTop;
+    public static final int $stable = 8;
+
+    /* compiled from: IslandView.kt */
+    /* loaded from: classes3.dex */
+    public interface Listener {
+        void onAction(IslandAction action);
+
+        void onDismiss();
+
+        void onOpen(IslandNotification notif);
+
+        void onSeek(float fraction);
+
+        void onSystemStatusAction(IslandSystemStatus.Type type);
+
+        void onToggleExpand();
+    }
+
+    /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
+    /* JADX WARN: Type inference failed for?? r5v6, types: [io.github.colorisland.island.IslandView$indeterminateRunnable$1] */
+    public IslandView(final Context context) {
+        super(context);
+        Intrinsics.checkNotNullParameter(context, "context");
+        this.density = getResources().getDisplayMetrics().density;
+        this.screenWidth = getResources().getDisplayMetrics().widthPixels;
+        this.moduleContext = LazyKt.lazy(new Function0() { // from class: io.github.colorisland.island.IslandView$$ExternalSyntheticLambda1
+            @Override // kotlin.jvm.functions.Function0
+            public final Object invoke() {
+                Context moduleContext_delegate$lambda$1;
+                moduleContext_delegate$lambda$1 = IslandView.moduleContext_delegate$lambda$1(IslandView.this, context);
+                return moduleContext_delegate$lambda$1;
+            }
+        });
+        GradientDrawable gradientDrawable = new GradientDrawable();
+        gradientDrawable.setShape(0);
+        gradientDrawable.setOrientation(GradientDrawable.Orientation.TOP_BOTTOM);
+        gradientDrawable.setColors(bgGradientColors(IslandConfig.INSTANCE.getIslandBgColor()));
+        gradientDrawable.setCornerRadius(dpF(17.0f));
+        gradientDrawable.setStroke(dp(1.0f), 872415231);
+        this.bgDrawable = gradientDrawable;
+        this.compactRoot = new LinearLayout(context);
+        this.compactIcon = new ImageView(context);
+        this.compactToggle = new ImageView(context);
+        this.expToggle = new ImageView(context);
+        this.expConnInfo = new TextView(context);
+        this.expandedRoot = new LinearLayout(context);
+        this.expHeader = new LinearLayout(context);
+        this.expIcon = new ImageView(context);
+        this.expAppName = new TextView(context);
+        this.expTitle = new TextView(context);
+        this.expText = new TextView(context);
+        this.expSubText = new TextView(context);
+        this.expMessages = new TextView(context);
+        this.expProgressBar = new FrameLayout(context);
+        this.expProgressTrack = new View(context);
+        this.expProgressFill = new View(context);
+        this.actionsRow = new LinearLayout(context);
+        this.cutoutSpacer = new View(context);
+        this.lastBoundMessagesText = "";
+        this.messageBubbleColor = withAlpha(IslandConfig.INSTANCE.getIslandAccentColor(), 0.16f);
+        this.lastIndeterminateChunk = -1;
+        this.indeterminateRunnable = new Runnable() { // from class: io.github.colorisland.island.IslandView$indeterminateRunnable$1
+            @Override // java.lang.Runnable
+            public void run() {
+                boolean z;
+                long j;
+                float f;
+                long j2;
+                z = IslandView.this.indeterminateRunning;
+                if (z) {
+                    long uptimeMillis = SystemClock.uptimeMillis();
+                    j = IslandView.this.lastIndeterminateFrameMs;
+                    long j3 = 0;
+                    if (j != 0) {
+                        j2 = IslandView.this.lastIndeterminateFrameMs;
+                        j3 = uptimeMillis - j2;
+                    }
+                    IslandView.this.lastIndeterminateFrameMs = uptimeMillis;
+                    IslandView islandView = IslandView.this;
+                    f = islandView.indeterminatePhase;
+                    islandView.indeterminatePhase = (f + (((float) j3) / 480.0f)) % 1.0f;
+                    IslandView.this.updateIndeterminateFill();
+                    IslandView.this.postOnAnimation(this);
+                }
+            }
+        };
+        this.compactWidthPx = dp(IslandConfig.INSTANCE.getCompactWidthDp());
+        this.expandedWidthPx = dp(IslandConfig.INSTANCE.getExpandedWidthDp());
+        this.expandedHeightPx = dp(IslandConfig.INSTANCE.getExpandedHeightDp());
+        buildCompact();
+        buildExpanded();
+        setBackground(gradientDrawable);
+        setClipChildren(false);
+        setClipToPadding(false);
+        setClickable(true);
+        setFocusable(false);
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public static final void animateOut$lambda$23(IslandView islandView, Function0 function0) {
+        islandView.setVisibility(8);
+        islandView.setLayerType(0, null);
+        function0.invoke();
+    }
+
+    private final void applyCurrentSize(boolean animate) {
+        boolean z = this.expanded;
+        int i = z ? this.expandedWidthPx : this.compactWidthPx;
+        int dp = z ? this.expandedHeightPx : dp(IslandConfig.INSTANCE.getCompactHeightDp());
+        Function3<? super Integer, ? super Integer, ? super Boolean, Unit> function3 = this.sizeChangeListener;
+        if (function3 != null) {
+            function3.invoke(Integer.valueOf(i), Integer.valueOf(dp), Boolean.valueOf(animate));
+        }
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public final void applyProgressFill() {
+        int progress;
+        if (this.expProgressBar.getVisibility() != 0) {
+            return;
+        }
+        if (this.expProgressBar.getWidth() > 0) {
+            this.progressBarWidth = this.expProgressBar.getWidth();
+        }
+        IslandNotification islandNotification = this.notif;
+        if (this.progressBarWidth > 0 && islandNotification != null && (progress = islandNotification.getProgress()) >= 0 && progress < 101) {
+            if (islandNotification.getProgressIndeterminate()) {
+                startIndeterminate();
+            } else {
+                stopIndeterminate();
+                setProgressFillWidth((this.progressBarWidth * islandNotification.getProgress()) / 100);
+            }
+        }
+        refreshProgressHitArea();
+    }
+
+    /* JADX WARN: Multi-variable type inference failed */
+    private final void buildCompact() {
+        Drawable drawable;
+        Drawable r2 = null;
+        this.compactRoot.setOrientation(0);
+        this.compactRoot.setGravity(16);
+        this.compactRoot.setPadding(dp(8.0f), 0, dp(8.0f), 0);
+        this.compactIcon.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        this.compactRoot.addView(this.compactIcon, new LinearLayout.LayoutParams(dp(18.0f), dp(18.0f)));
+        LinearLayout linearLayout = this.compactRoot;
+        View view = this.cutoutSpacer;
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(0, 0);
+        layoutParams.weight = 1.0f;
+        Unit unit = Unit.INSTANCE;
+        linearLayout.addView(view, layoutParams);
+        this.compactToggle.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        this.compactToggle.setPadding(0, 0, 0, 0);
+        ImageView imageView = this.compactToggle;
+        GradientDrawable gradientDrawable = new GradientDrawable();
+        gradientDrawable.setShape(1);
+        gradientDrawable.setColor(872415231);
+        imageView.setBackground(gradientDrawable);
+        Context moduleContext = getModuleContext();
+        if (moduleContext != null) {
+            try {
+                drawable = moduleContext.getDrawable(R.drawable.ic_toggle);
+            } catch (Throwable th) {
+                drawable = null;
+            }
+            r2 = drawable;
+        }
+        this.compactToggle.setImageDrawable(r2);
+        this.compactToggle.setVisibility(8);
+        LinearLayout.LayoutParams layoutParams2 = new LinearLayout.LayoutParams(dp(18.0f), dp(18.0f));
+        layoutParams2.setMarginStart(0);
+        this.compactRoot.addView(this.compactToggle, layoutParams2);
+        addView(this.compactRoot, new FrameLayout.LayoutParams(-1, -1));
+    }
+
+    /* JADX WARN: Multi-variable type inference failed */
+    private final void buildExpanded() {
+        Drawable drawable;
+        Drawable r12 = null;
+        this.expandedRoot.setOrientation(1);
+        this.expandedRoot.setPadding(dp(14.0f), dp(12.0f), dp(14.0f), dp(12.0f));
+        this.expandedRoot.setAlpha(0.0f);
+        this.expandedRoot.setVisibility(4);
+        this.expHeader.setOrientation(0);
+        this.expHeader.setGravity(16);
+        this.expIcon.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        this.expHeader.addView(this.expIcon, new LinearLayout.LayoutParams(dp(22.0f), dp(22.0f)));
+        this.expAppName.setTextSize(2, 11.0f);
+        this.expAppName.setTextColor(-1711276033);
+        this.expAppName.setMaxLines(1);
+        this.expAppName.setEllipsize(TextUtils.TruncateAt.END);
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(-2, -2);
+        layoutParams.setMarginStart(dp(8.0f));
+        layoutParams.weight = 1.0f;
+        this.expHeader.addView(this.expAppName, layoutParams);
+        this.expToggle.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        ImageView imageView = this.expToggle;
+        Context moduleContext = getModuleContext();
+        if (moduleContext != null) {
+            try {
+                drawable = moduleContext.getDrawable(R.drawable.ic_toggle);
+            } catch (Throwable th) {
+                drawable = null;
+            }
+            r12 = drawable;
+        }
+        imageView.setImageDrawable(r12);
+        ImageView imageView2 = this.expToggle;
+        GradientDrawable gradientDrawable = new GradientDrawable();
+        gradientDrawable.setShape(1);
+        gradientDrawable.setColor(872415231);
+        imageView2.setBackground(gradientDrawable);
+        this.expToggle.setVisibility(8);
+        this.expToggle.setOnClickListener(new View.OnClickListener() { // from class: io.github.colorisland.island.IslandView$$ExternalSyntheticLambda3
+            @Override // android.view.View.OnClickListener
+            public final void onClick(View view) {
+                IslandView.buildExpanded$lambda$13(IslandView.this, view);
+            }
+        });
+        this.expHeader.addView(this.expToggle, new LinearLayout.LayoutParams(dp(20.0f), dp(20.0f)));
+        this.expandedRoot.addView(this.expHeader, new LinearLayout.LayoutParams(-1, -2));
+        this.expTitle.setTextSize(2, 14.0f);
+        this.expTitle.setTextColor(-1);
+        this.expTitle.setMaxLines(1);
+        this.expTitle.setEllipsize(TextUtils.TruncateAt.END);
+        TextView textView = this.expTitle;
+        textView.setTypeface(textView.getTypeface(), 1);
+        LinearLayout.LayoutParams layoutParams2 = new LinearLayout.LayoutParams(-1, -2);
+        layoutParams2.topMargin = dp(8.0f);
+        this.expandedRoot.addView(this.expTitle, layoutParams2);
+        this.expText.setTextSize(2, 12.5f);
+        this.expText.setTextColor(-1275068417);
+        this.expText.setMaxLines(3);
+        this.expText.setEllipsize(TextUtils.TruncateAt.END);
+        LinearLayout.LayoutParams layoutParams3 = new LinearLayout.LayoutParams(-1, -2);
+        layoutParams3.topMargin = dp(3.0f);
+        this.expandedRoot.addView(this.expText, layoutParams3);
+        this.expConnInfo.setTextSize(2, 11.0f);
+        this.expConnInfo.setTextColor(-1711276033);
+        this.expConnInfo.setMaxLines(2);
+        this.expConnInfo.setEllipsize(TextUtils.TruncateAt.END);
+        this.expConnInfo.setVisibility(8);
+        LinearLayout.LayoutParams layoutParams4 = new LinearLayout.LayoutParams(-1, -2);
+        layoutParams4.topMargin = dp(4.0f);
+        this.expandedRoot.addView(this.expConnInfo, layoutParams4);
+        this.expSubText.setTextSize(2, 11.5f);
+        this.expSubText.setTextColor(-1711276033);
+        this.expSubText.setMaxLines(1);
+        this.expSubText.setEllipsize(TextUtils.TruncateAt.END);
+        LinearLayout.LayoutParams layoutParams5 = new LinearLayout.LayoutParams(-1, -2);
+        layoutParams5.topMargin = dp(2.0f);
+        this.expandedRoot.addView(this.expSubText, layoutParams5);
+        this.expMessages.setTextSize(2, 12.0f);
+        this.expMessages.setTextColor(-1275068417);
+        this.expMessages.setMaxLines(3);
+        this.expMessages.setEllipsize(TextUtils.TruncateAt.END);
+        LinearLayout.LayoutParams layoutParams6 = new LinearLayout.LayoutParams(-1, -2);
+        layoutParams6.topMargin = dp(4.0f);
+        this.expandedRoot.addView(this.expMessages, layoutParams6);
+        LinearLayout.LayoutParams layoutParams7 = new LinearLayout.LayoutParams(-1, dp(4.0f));
+        layoutParams7.topMargin = dp(8.0f);
+        this.expProgressBar.setClipChildren(true);
+        this.expProgressTrack.setBackgroundColor(872415231);
+        this.expProgressBar.addView(this.expProgressTrack, new FrameLayout.LayoutParams(-1, -1));
+        this.expProgressFill.setBackgroundColor(IslandConfig.INSTANCE.getIslandAccentColor());
+        this.expProgressBar.addView(this.expProgressFill, new FrameLayout.LayoutParams(0, -1));
+        this.expandedRoot.addView(this.expProgressBar, layoutParams7);
+        this.actionsRow.setOrientation(0);
+        LinearLayout.LayoutParams layoutParams8 = new LinearLayout.LayoutParams(-1, -2);
+        layoutParams8.topMargin = dp(10.0f);
+        this.expandedRoot.addView(this.actionsRow, layoutParams8);
+        addView(this.expandedRoot, new FrameLayout.LayoutParams(-1, -1));
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public static final void buildExpanded$lambda$13(IslandView islandView, View view) {
+        Listener listener;
+        IslandSystemStatus islandSystemStatus = islandView.status;
+        if (!islandView.statusMode || islandSystemStatus == null) {
+            return;
+        }
+        if ((islandSystemStatus.getType() == IslandSystemStatus.Type.FLASHLIGHT || islandSystemStatus.getType() == IslandSystemStatus.Type.HOTSPOT) && (listener = islandView.listener) != null) {
+            listener.onSystemStatusAction(islandSystemStatus.getType());
+        }
+    }
+
+    private final void clearSeekPreview() {
+        int progress;
+        IslandNotification islandNotification = this.notif;
+        if (islandNotification != null && (progress = islandNotification.getProgress()) >= 0 && progress < 101 && this.progressBarWidth > 0) {
+            if (islandNotification.getProgressIndeterminate()) {
+                startIndeterminate();
+            } else {
+                setProgressFillWidth((this.progressBarWidth * islandNotification.getProgress()) / 100);
+            }
+        }
+    }
+
+    private final float colorLuma(int color) {
+        return ((Color.red(color) / 255.0f) * 0.2126f) + ((Color.green(color) / 255.0f) * 0.7152f) + ((Color.blue(color) / 255.0f) * 0.0722f);
+    }
+
+    private final int computeCompactWidth() {
+        int measureCompactWidth = measureCompactWidth();
+        int result = ((!IslandConfig.INSTANCE.getAvoidCutout() || this.cutoutWidthPx <= 0) && IslandConfig.INSTANCE.getCompactWidthDp() > 0) ? Math.max(dp(IslandConfig.INSTANCE.getCompactWidthDp()), measureCompactWidth) : measureCompactWidth;
+        // APP 通知胶囊加宽 9dp(36px@density4)，弥补去开关后的窄感，视觉更饱满；系统状态岛(手电筒/热点)不加
+        if (!this.statusMode) {
+            result += dp(9.0f);
+        }
+        return result;
+    }
+
+    private final int dp(float value) {
+        return (int) ((value * this.density) + 0.5f);
+    }
+
+    private final float dpF(float value) {
+        return value * this.density;
+    }
+
+    private final void endSeek() {
+        this.seeking = false;
+        ViewParent parent = getParent();
+        if (parent != null) {
+            parent.requestDisallowInterceptTouchEvent(false);
+        }
+        clearSeekPreview();
+    }
+
+    private final Context getModuleContext() {
+        return (Context) this.moduleContext.getValue();
+    }
+
+    private final int measureCompactWidth() {
+        int i;
+        int dp = dp(8.0f) + dp(18.0f) + (this.compactToggle.getVisibility() == 0 ? dp(18.0f) : 0) + dp(8.0f);
+        return (!IslandConfig.INSTANCE.getAvoidCutout() || (i = this.cutoutWidthPx) <= 0) ? RangesKt.coerceIn(Math.max(dp + dp(40.0f), dp(96.0f)), dp(40.0f), dp(280.0f)) : RangesKt.coerceIn(dp + i + dp(16.0f), dp(40.0f), dp(280.0f));
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public static final Context moduleContext_delegate$lambda$1(IslandView islandView, Context context) {
+        Object m5221constructorimpl;
+        try {
+            m5221constructorimpl = KResult.success(context.createPackageContext(IslandConfig.MODULE_PACKAGE, 3));
+        } catch (Throwable th) {
+            m5221constructorimpl = KResult.success(KResult.createFailure(th));
+        }
+        if (KResult.isFailureimpl(m5221constructorimpl)) {
+            m5221constructorimpl = null;
+        }
+        return (Context) m5221constructorimpl;
+    }
+
+    private final void previewSeek(float fraction) {
+        if (this.progressBarWidth <= 0) {
+            return;
+        }
+        stopIndeterminate();
+        setProgressFillWidth((int) (this.progressBarWidth * fraction));
+    }
+
+    private final Float progressFractionAt(float x) {
+        int i;
+        if (this.expProgressBar.getVisibility() == 0 && (i = this.progressBarWidth) > 0) {
+            return Float.valueOf(RangesKt.coerceIn((x - this.expProgressBar.getLeft()) / i, 0.0f, 1.0f));
+        }
+        return null;
+    }
+
+    private final void rebuildActions(List<IslandAction> actions) {
+        // 二次过滤无意义标题(纯符号/省略号)，兜底避免"..."按钮
+        List<IslandAction> filtered = new ArrayList<>();
+        for (int k = 0; k < actions.size(); k++) {
+            String t = actions.get(k).getTitle();
+            if (t != null) {
+                boolean ok = false;
+                for (int ci = 0; ci < t.length(); ci++) {
+                    if (Character.isLetterOrDigit(t.charAt(ci))) {
+                        ok = true;
+                        break;
+                    }
+                }
+                if (ok) {
+                    filtered.add(actions.get(k));
+                }
+            }
+        }
+        actions = filtered;
+        if (actions.isEmpty()) {
+            this.actionsRow.removeAllViews();
+            this.actionsRow.setVisibility(8);
+            return;
+        }
+        this.actionsRow.setVisibility(0);
+        while (this.actionsRow.getChildCount() > actions.size()) {
+            LinearLayout linearLayout = this.actionsRow;
+            linearLayout.removeViewAt(linearLayout.getChildCount() - 1);
+        }
+        int i = 0;
+        for (Object obj : actions) {
+            int i2 = i + 1;
+            if (i < 0) {
+                CollectionsKt.throwIndexOverflow();
+            }
+            final IslandAction islandAction = (IslandAction) obj;
+            View childAt = this.actionsRow.getChildAt(i);
+            TextView textView = childAt instanceof TextView ? (TextView) childAt : null;
+            if (textView == null) {
+                textView = new TextView(getContext());
+                textView.setTextSize(2, 12.0f);
+                textView.setTextColor(-1);
+                GradientDrawable gradientDrawable = new GradientDrawable();
+                gradientDrawable.setShape(0);
+                gradientDrawable.setCornerRadius(dpF(14.0f));
+                gradientDrawable.setColor(this.messageBubbleColor);
+                textView.setBackground(gradientDrawable);
+                textView.setPadding(dp(14.0f), dp(7.0f), dp(14.0f), dp(7.0f));
+                textView.setMaxLines(1);
+                textView.setEllipsize(TextUtils.TruncateAt.END);
+                textView.setAllCaps(false);
+                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(0, -2, 1.0f);
+                if (i > 0) {
+                    layoutParams.setMarginStart(dp(6.0f));
+                }
+                textView.setLayoutParams(layoutParams);
+                this.actionsRow.addView(textView);
+            }
