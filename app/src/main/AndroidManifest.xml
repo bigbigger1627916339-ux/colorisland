@@ -2,12 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- 获取已安装应用列表（应用页展示） -->
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
-    <!-- 通知权限（Android 13+） -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
-    <!-- 岛屿广播 API 自定义权限（signature 级，仅同签名应用可调用） -->
     <permission
         android:name="io.github.colorisland.permission.SEND_ISLAND"
         android:protectionLevel="signature" />
@@ -31,20 +28,19 @@
             android:name="io.github.colorisland.MainActivity"
             android:configChanges="keyboardHidden|orientation|screenLayout|screenSize|uiMode"
             android:exported="true"
-            android:label="@string/app_name"
             android:theme="@style/Theme.ColorIsland">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
-                <!-- LSPosed 模块管理入口 -->
                 <category android:name="de.robv.android.xposed.category.MODULE_SETTINGS" />
             </intent-filter>
         </activity>
 
-        <!-- libxposed 服务提供者（模块与 SystemUI 侧通信） -->
+        <!-- libxposed 规范要求：Xposed 框架通过此 Provider 发现模块，必须 exported -->
         <provider
             android:name="io.github.libxposed.service.XposedProvider"
             android:authorities="io.github.colorisland.XposedService"
-            android:exported="true" />
+            android:exported="true"
+            tools:ignore="ExportedContentProvider" />
     </application>
 </manifest>
