@@ -231,12 +231,12 @@ public final /* data */ class IslandRequest {
         Intrinsics.checkNotNullParameter(pkg, "pkg");
         Intrinsics.checkNotNullParameter(appLabel, "appLabel");
         Intrinsics.checkNotNullParameter(actions, "actions");
-        return new IslandRequest(id, title, text, subText, pkg, appLabel, icon, contentIntent, timeoutMs, persistent, actions);
+        return new IslandRequest(id, title, text, subText, pkg, appLabel, icon, contentIntent, timeoutMs, actions);
     }
 
     public boolean equals(Object other) {
         if (this == other) {
-            return false;
+            return true;
         }
         if (!(other instanceof IslandRequest)) {
             return false;
@@ -294,7 +294,7 @@ public final /* data */ class IslandRequest {
         Icon icon = this.icon;
         int hashCode2 = (hashCode + (icon == null ? 0 : icon.hashCode())) * 31;
         PendingIntent pendingIntent = this.contentIntent;
-        return ((((((hashCode2 + (pendingIntent != null ? pendingIntent.hashCode() : 0 : 0)) * 31) + Long.hashCode(this.timeoutMs)) * 31) + Boolean.hashCode(this.persistent)) * 31) + this.actions.hashCode();
+        return ((((((hashCode2 + (pendingIntent != null ? pendingIntent.hashCode() : 0)) * 31) + Long.hashCode(this.timeoutMs)) * 31) + Boolean.hashCode(this.persistent)) * 31) + this.actions.hashCode();
     }
 
     public String toString() {
