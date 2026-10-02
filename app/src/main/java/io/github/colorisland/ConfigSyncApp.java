@@ -129,7 +129,7 @@ public final class ConfigSyncApp extends Application implements XposedServiceHel
             } else if (obj instanceof Long) {
                 edit.putLong(key, ((Number) obj).longValue());
             } else if (obj instanceof String) {
-                edit.putString(key, (String) value);
+                edit.putString(key, (String) obj);
             } else {
                 edit.remove(key);
             }
