@@ -1,0 +1,52 @@
+    /* JADX INFO: Access modifiers changed from: private */
+    public static final Unit register$lambda$9(SystemStatusMonitor systemStatusMonitor, IslandSystemStatus.Type type, boolean z) {
+        systemStatusMonitor.onSystemStatusFromNotification(type, z);
+        return Unit.INSTANCE;
+    }
+
+    private final String trimQuotes(String s) {
+        if (s.length() >= 2 && s.charAt(0) == '"') {
+            s = s.substring(1, s.length() - 1);
+            Intrinsics.checkNotNullExpressionValue(s, "substring(...)");
+        }
+        return s;
+    }
+
+    public final void unregister() {
+        CameraManager cameraManager;
+        CameraManager.TorchCallback torchCallback;
+        BroadcastReceiver broadcastReceiver = this.receiver;
+        if (broadcastReceiver != null) {
+            try {
+                this.context.unregisterReceiver(broadcastReceiver);
+            } catch (Throwable th) {
+                Log.w(TAG, "unregisterReceiver ignored", th);
+            }
+        }
+        this.receiver = null;
+        IslandController.INSTANCE.setStatusSink(null);
+        stopConnRefresh();
+        Object systemService = this.context.getSystemService("camera");
+        CameraManager cameraManager2 = systemService instanceof CameraManager ? (CameraManager) systemService : null;
+        if (cameraManager2 != null && (torchCallback = this.torchCallback) != null) {
+            try {
+                if (Intrinsics.areEqual(cameraManager2, cameraManager2)) {
+                    cameraManager2.unregisterTorchCallback(torchCallback);
+                }
+            } catch (Throwable th) {
+                Log.w(TAG, "unregisterTorchCallback ignored", th);
+            }
+        }
+        this.torchCallback = null;
+        this.torchCameraId = null;
+        this.lastApEnabled = null;
+        this.lastCharging = null;
+        this.lastFlashlight = null;
+        IslandController.INSTANCE.setTorchCameraId(null);
+    }
+
+    public final void updateConnInfo(String info) {
+        Intrinsics.checkNotNullParameter(info, "info");
+        IslandController.INSTANCE.updateConnInfo(info);
+    }
+}
