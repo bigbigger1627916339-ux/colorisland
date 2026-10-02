@@ -1,0 +1,535 @@
+package io.github.colorisland.data;
+
+import io.github.colorisland.util.StringUtils;
+
+import android.content.SharedPreferences;
+import androidx.compose.runtime.MutableState;
+import androidx.compose.runtime.MutableState;
+import androidx.compose.runtime.SnapshotStateKt;
+import io.github.colorisland.IslandConfig;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import kotlin.Metadata;
+import kotlin.TuplesKt;
+import kotlin.collections.CollectionsKt;
+import kotlin.collections.MapsKt;
+import kotlin.jvm.internal.Intrinsics;
+import kotlin.text.StringsKt;
+
+/* compiled from: PrefsRepository.kt */
+/* loaded from: classes3.dex */
+public final class PrefsRepository implements SharedPreferences.OnSharedPreferenceChangeListener {
+    public static final String K_AUTO_EXPAND = "auto_expand";
+    public static final String K_AVOID_CUTOUT = "avoid_cutout";
+    public static final String K_COMPACT_HEIGHT = "compact_height_dp";
+    public static final String K_COMPACT_WIDTH = "compact_width_dp";
+    public static final String K_CORNER_RADIUS = "corner_radius_dp";
+    public static final String K_DEBUG_LOG = "debug_log";
+    public static final String K_DISABLED_APPS = "disabled_apps";
+    public static final String K_DISABLED_CHANNELS = "disabled_channels";
+    public static final String K_DISPLAY_DURATION = "display_duration_ms";
+    public static final String K_ENABLED = "master_enabled";
+    public static final String K_EXPANDED_DURATION = "expanded_duration_ms";
+    public static final String K_EXPANDED_HEIGHT = "expanded_height_dp";
+    public static final String K_EXPANDED_WIDTH = "expanded_width_dp";
+    public static final String K_HIDE_GROUP = "hide_group_summary";
+    public static final String K_HIDE_ONGOING = "hide_ongoing";
+    public static final String K_ISLAND_ACCENT_COLOR = "island_accent_color";
+    public static final String K_ISLAND_BG_COLOR = "island_bg_color";
+    public static final String K_SYS_APP_TAKEOVER = "sys_app_takeover";
+    public static final String K_SYS_STATUS_CHARGING = "sys_status_charging";
+    public static final String K_SYS_STATUS_ENABLED = "sys_status_enabled";
+    public static final String K_SYS_STATUS_FLASHLIGHT = "sys_status_flashlight";
+    public static final String K_SYS_STATUS_HOTSPOT = "sys_status_hotspot";
+    public static final String K_SYS_STATUS_PERSISTENT = "sys_status_persistent";
+    public static final String K_SYS_STATUS_SCREEN_RECORD = "sys_status_screen_record";
+    public static final String K_Y_OFFSET = "y_offset_dp";
+
+    /* renamed from: autoExpand$delegate, reason: from kotlin metadata */
+    private final MutableState autoExpand;
+
+    /* renamed from: avoidCutout$delegate, reason: from kotlin metadata */
+    private final MutableState avoidCutout;
+
+    /* renamed from: compactHeightDp$delegate, reason: from kotlin metadata */
+    private final MutableState compactHeightDp;
+
+    /* renamed from: compactWidthDp$delegate, reason: from kotlin metadata */
+    private final MutableState compactWidthDp;
+
+    /* renamed from: cornerRadiusDp$delegate, reason: from kotlin metadata */
+    private final MutableState cornerRadiusDp;
+
+    /* renamed from: debugLog$delegate, reason: from kotlin metadata */
+    private final MutableState debugLog;
+
+    /* renamed from: disabledApps$delegate, reason: from kotlin metadata */
+    private final MutableState disabledApps;
+
+    /* renamed from: disabledChannels$delegate, reason: from kotlin metadata */
+    private final MutableState disabledChannels;
+
+    /* renamed from: displayDurationMs$delegate, reason: from kotlin metadata */
+    private final MutableState displayDurationMs;
+
+    /* renamed from: expandedDurationMs$delegate, reason: from kotlin metadata */
+    private final MutableState expandedDurationMs;
+
+    /* renamed from: expandedHeightDp$delegate, reason: from kotlin metadata */
+    private final MutableState expandedHeightDp;
+
+    /* renamed from: expandedWidthDp$delegate, reason: from kotlin metadata */
+    private final MutableState expandedWidthDp;
+
+    /* renamed from: hideGroupSummary$delegate, reason: from kotlin metadata */
+    private final MutableState hideGroupSummary;
+
+    /* renamed from: hideOngoing$delegate, reason: from kotlin metadata */
+    private final MutableState hideOngoing;
+
+    /* renamed from: islandAccentColor$delegate, reason: from kotlin metadata */
+    private final MutableState islandAccentColor;
+
+    /* renamed from: islandBgColor$delegate, reason: from kotlin metadata */
+    private final MutableState islandBgColor;
+
+    /* renamed from: masterEnabled$delegate, reason: from kotlin metadata */
+    private final MutableState masterEnabled;
+    private final SharedPreferences prefs;
+
+    /* renamed from: statusFlags$delegate, reason: from kotlin metadata */
+    private final MutableState statusFlags;
+
+    /* renamed from: sysAppTakeover$delegate, reason: from kotlin metadata */
+    private final MutableState sysAppTakeover;
+
+    /* renamed from: systemStatusEnabled$delegate, reason: from kotlin metadata */
+    private final MutableState systemStatusEnabled;
+
+    /* renamed from: systemStatusPersistent$delegate, reason: from kotlin metadata */
+    private final MutableState systemStatusPersistent;
+
+    /* renamed from: yOffsetDp$delegate, reason: from kotlin metadata */
+    private final MutableState yOffsetDp;
+    public static final int $stable = 8;
+
+    public PrefsRepository(SharedPreferences prefs) {
+        MutableState mutableStateOf$default;
+        MutableState mutableStateOf$default2;
+        MutableState mutableStateOf$default3;
+        MutableState mutableStateOf$default4;
+        MutableState mutableStateOf$default5;
+        MutableState mutableStateOf$default6;
+        MutableState mutableStateOf$default7;
+        MutableState mutableStateOf$default8;
+        MutableState mutableStateOf$default9;
+        MutableState mutableStateOf$default10;
+        MutableState mutableStateOf$default11;
+        MutableState mutableStateOf$default12;
+        MutableState mutableStateOf$default13;
+        MutableState mutableStateOf$default14;
+        MutableState mutableStateOf$default15;
+        MutableState mutableStateOf$default16;
+        MutableState mutableStateOf$default17;
+        MutableState mutableStateOf$default18;
+        MutableState mutableStateOf$default19;
+        MutableState mutableStateOf$default20;
+        MutableState mutableStateOf$default21;
+        MutableState mutableStateOf$default22;
+        Intrinsics.checkNotNullParameter(prefs, "prefs");
+        this.prefs = prefs;
+        mutableStateOf$default = SnapshotStateKt.mutableStateOf(Boolean.valueOf(prefs.getBoolean("master_enabled", true)), SnapshotStateKt.structuralEqualityPolicy());
+        this.masterEnabled = mutableStateOf$default;
+        mutableStateOf$default2 = SnapshotStateKt.mutableStateOf(Boolean.valueOf(prefs.getBoolean("auto_expand", true)), SnapshotStateKt.structuralEqualityPolicy());
+        this.autoExpand = mutableStateOf$default2;
+        mutableStateOf$default3 = SnapshotStateKt.mutableStateOf(Integer.valueOf(prefs.getInt("display_duration_ms", 5000)), SnapshotStateKt.structuralEqualityPolicy());
+        this.displayDurationMs = mutableStateOf$default3;
+        mutableStateOf$default4 = SnapshotStateKt.mutableStateOf(Integer.valueOf(prefs.getInt("expanded_duration_ms", 4000)), SnapshotStateKt.structuralEqualityPolicy());
+        this.expandedDurationMs = mutableStateOf$default4;
+        mutableStateOf$default5 = SnapshotStateKt.mutableStateOf(Boolean.valueOf(prefs.getBoolean("hide_ongoing", true)), SnapshotStateKt.structuralEqualityPolicy());
+        this.hideOngoing = mutableStateOf$default5;
+        mutableStateOf$default6 = SnapshotStateKt.mutableStateOf(Boolean.valueOf(prefs.getBoolean("avoid_cutout", true)), SnapshotStateKt.structuralEqualityPolicy());
+        this.avoidCutout = mutableStateOf$default6;
+        mutableStateOf$default7 = SnapshotStateKt.mutableStateOf(Boolean.valueOf(prefs.getBoolean("hide_group_summary", true)), SnapshotStateKt.structuralEqualityPolicy());
+        this.hideGroupSummary = mutableStateOf$default7;
+        mutableStateOf$default8 = SnapshotStateKt.mutableStateOf(Integer.valueOf(prefs.getInt("y_offset_dp", 0)), SnapshotStateKt.structuralEqualityPolicy());
+        this.yOffsetDp = mutableStateOf$default8;
+        mutableStateOf$default9 = SnapshotStateKt.mutableStateOf(Boolean.valueOf(prefs.getBoolean("debug_log", false)), SnapshotStateKt.structuralEqualityPolicy());
+        this.debugLog = mutableStateOf$default9;
+        mutableStateOf$default10 = SnapshotStateKt.mutableStateOf(Integer.valueOf(prefs.getInt("compact_width_dp", 0)), SnapshotStateKt.structuralEqualityPolicy());
+        this.compactWidthDp = mutableStateOf$default10;
+        mutableStateOf$default11 = SnapshotStateKt.mutableStateOf(Integer.valueOf(prefs.getInt("compact_height_dp", 34)), SnapshotStateKt.structuralEqualityPolicy());
+        this.compactHeightDp = mutableStateOf$default11;
+        mutableStateOf$default12 = SnapshotStateKt.mutableStateOf(Integer.valueOf(prefs.getInt("expanded_width_dp", 340)), SnapshotStateKt.structuralEqualityPolicy());
+        this.expandedWidthDp = mutableStateOf$default12;
+        mutableStateOf$default13 = SnapshotStateKt.mutableStateOf(Integer.valueOf(prefs.getInt("expanded_height_dp", 150)), SnapshotStateKt.structuralEqualityPolicy());
+        this.expandedHeightDp = mutableStateOf$default13;
+        mutableStateOf$default14 = SnapshotStateKt.mutableStateOf(Integer.valueOf(prefs.getInt("corner_radius_dp", 0)), SnapshotStateKt.structuralEqualityPolicy());
+        this.cornerRadiusDp = mutableStateOf$default14;
+        mutableStateOf$default15 = SnapshotStateKt.mutableStateOf(Integer.valueOf(prefs.getInt("island_bg_color", IslandConfig.DEFAULT_BG_COLOR)), SnapshotStateKt.structuralEqualityPolicy());
+        this.islandBgColor = mutableStateOf$default15;
+        mutableStateOf$default16 = SnapshotStateKt.mutableStateOf(Integer.valueOf(prefs.getInt("island_accent_color", IslandConfig.DEFAULT_ACCENT_COLOR)), SnapshotStateKt.structuralEqualityPolicy());
+        this.islandAccentColor = mutableStateOf$default16;
+        mutableStateOf$default17 = SnapshotStateKt.mutableStateOf(loadDisabledApps(), SnapshotStateKt.structuralEqualityPolicy());
+        this.disabledApps = mutableStateOf$default17;
+        mutableStateOf$default18 = SnapshotStateKt.mutableStateOf(loadDisabledChannels(), SnapshotStateKt.structuralEqualityPolicy());
+        this.disabledChannels = mutableStateOf$default18;
+        mutableStateOf$default19 = SnapshotStateKt.mutableStateOf(Boolean.valueOf(prefs.getBoolean("sys_status_enabled", true)), SnapshotStateKt.structuralEqualityPolicy());
+        this.systemStatusEnabled = mutableStateOf$default19;
+        mutableStateOf$default20 = SnapshotStateKt.mutableStateOf(loadStatusFlags(), SnapshotStateKt.structuralEqualityPolicy());
+        this.statusFlags = mutableStateOf$default20;
+        mutableStateOf$default21 = SnapshotStateKt.mutableStateOf(Boolean.valueOf(prefs.getBoolean("sys_status_persistent", false)), SnapshotStateKt.structuralEqualityPolicy());
+        this.systemStatusPersistent = mutableStateOf$default21;
+        mutableStateOf$default22 = SnapshotStateKt.mutableStateOf(Boolean.valueOf(prefs.getBoolean("sys_app_takeover", false)), SnapshotStateKt.structuralEqualityPolicy());
+        this.sysAppTakeover = mutableStateOf$default22;
+    }
+
+    private final Set<String> loadDisabledApps() {
+        String string = this.prefs.getString("disabled_apps", "");
+        List split$default = StringUtils.split((string != null ? string : ""), ',');
+        ArrayList arrayList = new ArrayList(CollectionsKt.collectionSizeOrDefault(split$default, 10));
+        Iterator it = split$default.iterator();
+        while (it.hasNext()) {
+            arrayList.add(StringsKt.trim((CharSequence) it.next()).toString());
+        }
+        ArrayList arrayList2 = new ArrayList();
+        for (Object obj : arrayList) {
+            if (((String) obj).length() > 0) {
+                arrayList2.add(obj);
+            }
+        }
+        return CollectionsKt.toSet(arrayList2);
+    }
+
+    private final Set<String> loadDisabledChannels() {
+        String string = this.prefs.getString("disabled_channels", "");
+        List split$default = StringUtils.split((string != null ? string : ""), ',');
+        ArrayList arrayList = new ArrayList(CollectionsKt.collectionSizeOrDefault(split$default, 10));
+        Iterator it = split$default.iterator();
+        while (it.hasNext()) {
+            arrayList.add(StringsKt.trim((CharSequence) it.next()).toString());
+        }
+        ArrayList arrayList2 = new ArrayList();
+        for (Object obj : arrayList) {
+            if (((String) obj).length() > 0) {
+                arrayList2.add(obj);
+            }
+        }
+        return CollectionsKt.toSet(arrayList2);
+    }
+
+    private final Map<String, Boolean> loadStatusFlags() {
+        return MapsKt.mapOf(TuplesKt.to("sys_status_flashlight", Boolean.valueOf(this.prefs.getBoolean("sys_status_flashlight", true))), TuplesKt.to("sys_status_charging", Boolean.valueOf(this.prefs.getBoolean("sys_status_charging", true))), TuplesKt.to("sys_status_screen_record", Boolean.valueOf(this.prefs.getBoolean("sys_status_screen_record", true))), TuplesKt.to("sys_status_hotspot", Boolean.valueOf(this.prefs.getBoolean("sys_status_hotspot", true))));
+    }
+
+    private final void putBoolean(String key, boolean value) {
+        this.prefs.edit().putBoolean(key, value).apply();
+    }
+
+    private final void putInt(String key, int value) {
+        this.prefs.edit().putInt(key, value).apply();
+    }
+
+    private final void putString(String key, String value) {
+        this.prefs.edit().putString(key, value).apply();
+    }
+
+    private final void setAutoExpand(boolean z) {
+        this.autoExpand.setValue(Boolean.valueOf(z));
+    }
+
+    private final void setAvoidCutout(boolean z) {
+        this.avoidCutout.setValue(Boolean.valueOf(z));
+    }
+
+    private final void setCompactHeightDp(int i) {
+        this.compactHeightDp.setValue(Integer.valueOf(i));
+    }
+
+    private final void setCompactWidthDp(int i) {
+        this.compactWidthDp.setValue(Integer.valueOf(i));
+    }
+
+    private final void setCornerRadiusDp(int i) {
+        this.cornerRadiusDp.setValue(Integer.valueOf(i));
+    }
+
+    private final void setDebugLog(boolean z) {
+        this.debugLog.setValue(Boolean.valueOf(z));
+    }
+
+    private final void setDisabledApps(Set<String> set) {
+        this.disabledApps.setValue(set);
+    }
+
+    private final void setDisabledChannels(Set<String> set) {
+        this.disabledChannels.setValue(set);
+    }
+
+    private final void setDisplayDurationMs(int i) {
+        this.displayDurationMs.setValue(Integer.valueOf(i));
+    }
+
+    private final void setExpandedDurationMs(int i) {
+        this.expandedDurationMs.setValue(Integer.valueOf(i));
+    }
+
+    private final void setExpandedHeightDp(int i) {
+        this.expandedHeightDp.setValue(Integer.valueOf(i));
+    }
+
+    private final void setExpandedWidthDp(int i) {
+        this.expandedWidthDp.setValue(Integer.valueOf(i));
+    }
+
+    private final void setHideGroupSummary(boolean z) {
+        this.hideGroupSummary.setValue(Boolean.valueOf(z));
+    }
+
+    private final void setHideOngoing(boolean z) {
+        this.hideOngoing.setValue(Boolean.valueOf(z));
+    }
+
+    private final void setIslandAccentColor(int i) {
+        this.islandAccentColor.setValue(Integer.valueOf(i));
+    }
+
+    private final void setIslandBgColor(int i) {
+        this.islandBgColor.setValue(Integer.valueOf(i));
+    }
+
+    private final void setMasterEnabled(boolean z) {
+        this.masterEnabled.setValue(Boolean.valueOf(z));
+    }
+
+    private final void setStatusFlags(Map<String, Boolean> map) {
+        this.statusFlags.setValue(map);
+    }
+
+    private final void setSysAppTakeover(boolean z) {
+        this.sysAppTakeover.setValue(Boolean.valueOf(z));
+    }
+
+    private final void setSystemStatusEnabled(boolean z) {
+        this.systemStatusEnabled.setValue(Boolean.valueOf(z));
+    }
+
+    private final void setSystemStatusPersistent(boolean z) {
+        this.systemStatusPersistent.setValue(Boolean.valueOf(z));
+    }
+
+    private final void setYOffsetDp(int i) {
+        this.yOffsetDp.setValue(Integer.valueOf(i));
+    }
+
+    /* JADX WARN: Multi-variable type inference failed */
+    public final boolean getAutoExpand() {
+        return ((Boolean) this.autoExpand.getValue()).booleanValue();
+    }
+
+    /* JADX WARN: Multi-variable type inference failed */
+    public final boolean getAvoidCutout() {
+        return ((Boolean) this.avoidCutout.getValue()).booleanValue();
+    }
+
+    /* JADX WARN: Multi-variable type inference failed */
+    public final int getCompactHeightDp() {
+        return ((Number) this.compactHeightDp.getValue()).intValue();
+    }
+
+    /* JADX WARN: Multi-variable type inference failed */
+    public final int getCompactWidthDp() {
+        return ((Number) this.compactWidthDp.getValue()).intValue();
+    }
+
+    /* JADX WARN: Multi-variable type inference failed */
+    public final int getCornerRadiusDp() {
+        return ((Number) this.cornerRadiusDp.getValue()).intValue();
+    }
+
+    /* JADX WARN: Multi-variable type inference failed */
+    public final boolean getDebugLog() {
+        return ((Boolean) this.debugLog.getValue()).booleanValue();
+    }
+
+    public final Set<String> getDisabledApps() {
+        return (Set) this.disabledApps.getValue();
+    }
+
+    public final Set<String> getDisabledChannels() {
+        return (Set) this.disabledChannels.getValue();
+    }
+
+    /* JADX WARN: Multi-variable type inference failed */
+    public final int getDisplayDurationMs() {
+        return ((Number) this.displayDurationMs.getValue()).intValue();
+    }
+
+    /* JADX WARN: Multi-variable type inference failed */
+    public final int getExpandedDurationMs() {
+        return ((Number) this.expandedDurationMs.getValue()).intValue();
+    }
+
+    /* JADX WARN: Multi-variable type inference failed */
+    public final int getExpandedHeightDp() {
+        return ((Number) this.expandedHeightDp.getValue()).intValue();
+    }
+
+    /* JADX WARN: Multi-variable type inference failed */
+    public final int getExpandedWidthDp() {
+        return ((Number) this.expandedWidthDp.getValue()).intValue();
+    }
+
+    /* JADX WARN: Multi-variable type inference failed */
+    public final boolean getHideGroupSummary() {
+        return ((Boolean) this.hideGroupSummary.getValue()).booleanValue();
+    }
+
+    /* JADX WARN: Multi-variable type inference failed */
+    public final boolean getHideOngoing() {
+        return ((Boolean) this.hideOngoing.getValue()).booleanValue();
+    }
+
+    /* JADX WARN: Multi-variable type inference failed */
+    public final int getIslandAccentColor() {
+        return ((Number) this.islandAccentColor.getValue()).intValue();
+    }
+
+    /* JADX WARN: Multi-variable type inference failed */
+    public final int getIslandBgColor() {
+        return ((Number) this.islandBgColor.getValue()).intValue();
+    }
+
+    /* JADX WARN: Multi-variable type inference failed */
+    public final boolean getMasterEnabled() {
+        return ((Boolean) this.masterEnabled.getValue()).booleanValue();
+    }
+
+    public final SharedPreferences getPrefs() {
+        return this.prefs;
+    }
+
+    public final Map<String, Boolean> getStatusFlags() {
+        return (Map) this.statusFlags.getValue();
+    }
+
+    /* JADX WARN: Multi-variable type inference failed */
+    public final boolean getSysAppTakeover() {
+        return ((Boolean) this.sysAppTakeover.getValue()).booleanValue();
+    }
+
+    /* JADX WARN: Multi-variable type inference failed */
+    public final boolean getSystemStatusEnabled() {
+        return ((Boolean) this.systemStatusEnabled.getValue()).booleanValue();
+    }
+
+    /* JADX WARN: Multi-variable type inference failed */
+    public final boolean getSystemStatusPersistent() {
+        return ((Boolean) this.systemStatusPersistent.getValue()).booleanValue();
+    }
+
+    /* JADX WARN: Multi-variable type inference failed */
+    public final int getYOffsetDp() {
+        return ((Number) this.yOffsetDp.getValue()).intValue();
+    }
+
+    @Override // android.content.SharedPreferences.OnSharedPreferenceChangeListener
+    public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+        if (prefs == null || key == null) {
+            return;
+        }
+        switch (key.hashCode()) {
+            case -1837377678:
+                if (key.equals("y_offset_dp")) {
+                    setYOffsetDp(prefs.getInt("y_offset_dp", 0));
+                    return;
+                }
+                return;
+            case -1811922325:
+                if (key.equals("sys_app_takeover")) {
+                    setSysAppTakeover(prefs.getBoolean("sys_app_takeover", false));
+                    return;
+                }
+                return;
+            case -1727204543:
+                if (key.equals("compact_width_dp")) {
+                    setCompactWidthDp(prefs.getInt("compact_width_dp", 0));
+                    return;
+                }
+                return;
+            case -1636431062:
+                if (key.equals("auto_expand")) {
+                    setAutoExpand(prefs.getBoolean("auto_expand", true));
+                    return;
+                }
+                return;
+            case -1040931679:
+                if (!key.equals("sys_status_flashlight")) {
+                    return;
+                }
+                break;
+            case -888156514:
+                if (key.equals("expanded_height_dp")) {
+                    setExpandedHeightDp(prefs.getInt("expanded_height_dp", 150));
+                    return;
+                }
+                return;
+            case -809506197:
+                if (key.equals("expanded_width_dp")) {
+                    setExpandedWidthDp(prefs.getInt("expanded_width_dp", 340));
+                    return;
+                }
+                return;
+            case -629559244:
+                if (key.equals("display_duration_ms")) {
+                    setDisplayDurationMs(prefs.getInt("display_duration_ms", 5000));
+                    return;
+                }
+                return;
+            case -417486423:
+                if (key.equals("hide_group_summary")) {
+                    setHideGroupSummary(prefs.getBoolean("hide_group_summary", true));
+                    return;
+                }
+                return;
+            case -374376875:
+                if (key.equals("disabled_apps")) {
+                    setDisabledApps(loadDisabledApps());
+                    return;
+                }
+                return;
+            case -197916840:
+                if (key.equals("debug_log")) {
+                    setDebugLog(prefs.getBoolean("debug_log", false));
+                    return;
+                }
+                return;
+            case -190550356:
+                if (!key.equals("sys_status_charging")) {
+                    return;
+                }
+                break;
+            case -64399917:
+                if (key.equals("island_bg_color")) {
+                    setIslandBgColor(prefs.getInt("island_bg_color", IslandConfig.DEFAULT_BG_COLOR));
+                    return;
+                }
+                return;
+            case 123283951:
+                if (key.equals("corner_radius_dp")) {
+                    setCornerRadiusDp(prefs.getInt("corner_radius_dp", 0));
+                    return;
+                }
+                return;
+            case 194304612:
+                if (key.equals("master_enabled")) {
+                    setMasterEnabled(prefs.getBoolean("master_enabled", true));
+                    return;
+                }
+                return;
+            case 211232307:
+                if (key.equals("disabled_channels")) {
