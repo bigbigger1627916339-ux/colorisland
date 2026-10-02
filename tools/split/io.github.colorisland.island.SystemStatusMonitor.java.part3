@@ -103,25 +103,3 @@
             // 5) 解析 /proc/net/arp 统计客户端（失败记 -1）
             int clients = -1;
             try {
-                List<String> arpLines = Files.readAllLines(
-                        new File("/proc/net/arp").toPath(), StandardCharsets.UTF_8);
-                List<String> entries = arpLines.size() > 1
-                        ? arpLines.subList(1, arpLines.size())
-                        : new ArrayList<String>();
-                int count = 0;
-                for (String line : entries) {
-                    String[] parts = line.trim().split("\\s+");
-                    // 热点客户端 arp 条目接口与 AP 自身同为 wlan0，不能用 iface 排除(否则永远统计 0 台)
-                    if (parts.length >= 6
-                            && "0x2".equals(parts[3])
-                            && (parts[5].startsWith("wlan")
-                            || parts[5].startsWith("ap")
-                            || parts[5].startsWith("swlan"))) {
-                        count++;
-                    }
-                }
-                clients = count;
-            } catch (Throwable th) {
-                clients = -1;
-            }
-            // 6) 按可用性拼装结果串
