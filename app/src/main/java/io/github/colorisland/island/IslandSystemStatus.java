@@ -156,7 +156,7 @@ public final /* data */ class IslandSystemStatus {
         Intrinsics.checkNotNullParameter(type, "type");
         Intrinsics.checkNotNullParameter(sourceLabel, "sourceLabel");
         Intrinsics.checkNotNullParameter(connInfo, "connInfo");
-        return new IslandSystemStatus(icon, title, text, durationMs, persistent, type, sourceLabel, connInfo);
+        return new IslandSystemStatus(icon, title, text, durationMs, persistentMs, persistent, type, sourceLabel, connInfo);
     }
 
     public boolean equals(Object other) {
@@ -203,10 +203,10 @@ public final /* data */ class IslandSystemStatus {
     }
 
     public int hashCode() {
-        return (((((((((((((this.icon.hashCode() * 31) + this.title.hashCode()) * 31) + this.text.hashCode()) * 31) + Long.hashCode(this.durationMs)) * 31) + Boolean.hashCode(this.persistent)) * 31) + this.type.hashCode()) * 31) + this.sourceLabel.hashCode()) * 31) + this.connInfo.hashCode());
+        return (((((((((((((this.icon.hashCode() * 31) + this.title.hashCode()) * 31) + this.text.hashCode()) * 31) + Long.hashCode(this.durationMs)) * 31) + Boolean.hashCode(this.persistent)) * 31) + this.type.hashCode()) * 31) + this.sourceLabel.hashCode()) * 31) + this.connInfo.hashCode();
     }
 
     public String toString() {
-        return "IslandSystemStatus(icon=" + this.icon + ", title=" + this.text + ", durationMs=" + this.durationMs + ", persistent=" + this.persistent + ", type=" + this.type + ", sourceLabel=" + this.sourceLabel + ", connInfo=" + this.connInfo + ")";
+        return "IslandSystemStatus(icon=" + this.icon + ", title=" + this.title + ", text=" + this.text + ", durationMs=" + this.durationMs + ", persistent=" + this.persistent + ", sourceLabel=" + this.sourceLabel + ", connInfo=" + this.connInfo + ")";
     }
 }
