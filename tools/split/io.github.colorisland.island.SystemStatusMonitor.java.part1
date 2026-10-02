@@ -131,28 +131,3 @@ public final class SystemStatusMonitor {
     static /* synthetic */ boolean emitStatus$default(SystemStatusMonitor systemStatusMonitor, IslandSystemStatus.Type type, int i, String str, String str2, long j, boolean z, String str3, int i2, Object obj) {
         return systemStatusMonitor.emitStatus(type, i, str, str2, j, z, (i2 & 64) != 0 ? "" : str3);
     }
-
-    private final String findTorchCameraId(CameraManager cm) {
-        String[] cameraIdList;
-        try {
-            cameraIdList = cm.getCameraIdList();
-        } catch (CameraAccessException e) {
-            return null;
-        }
-        int length = cameraIdList.length;
-        int i = 0;
-        while (true) {
-            if (i >= length) {
-                return null;
-            }
-            String str = cameraIdList[i];
-            CameraCharacteristics cameraCharacteristics;
-            try {
-                cameraCharacteristics = cm.getCameraCharacteristics(str);
-            } catch (CameraAccessException e) {
-                i++;
-                continue;
-            }
-            Intrinsics.checkNotNullExpressionValue(cameraCharacteristics, "getCameraCharacteristics(...)");
-            Object obj = cameraCharacteristics.get(CameraCharacteristics.FLASH_INFO_AVAILABLE);
-            Boolean bool = obj instanceof Boolean ? (Boolean) obj : null;
