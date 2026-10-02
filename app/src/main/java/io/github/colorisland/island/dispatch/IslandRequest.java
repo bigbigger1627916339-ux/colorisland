@@ -190,7 +190,7 @@ public final /* data */ class IslandRequest {
 
     /* renamed from: component3, reason: from getter */
     public final String component3() {
-        return this.text;
+        return this.title;
     }
 
     /* renamed from: component4, reason: from getter */
@@ -231,7 +231,7 @@ public final /* data */ class IslandRequest {
         Intrinsics.checkNotNullParameter(pkg, "pkg");
         Intrinsics.checkNotNullParameter(appLabel, "appLabel");
         Intrinsics.checkNotNullParameter(actions, "actions");
-        return new IslandRequest(id, title, text, subText, pkg, appLabel, icon, contentIntent, timeoutMs, actions);
+        return new IslandRequest(id, title, text, subText, pkg, appLabel, icon, contentIntent, timeoutMs, persistent, actions);
     }
 
     public boolean equals(Object other) {
