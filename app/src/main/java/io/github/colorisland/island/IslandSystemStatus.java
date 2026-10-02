@@ -40,15 +40,15 @@ public final /* data */ class IslandSystemStatus {
                 }
                 try {
                     iArr[Type.HOTSPOT.ordinal()] = 2;
-                } catch (NoSuchFieldError unused) {
+                } catch (NoSuchFieldError unused2) {
                 }
                 try {
                     iArr[Type.CHARGING.ordinal()] = 3;
-                } catch (NoSuchFieldError unused) {
+                } catch (NoSuchFieldError unused3) {
                 }
                 try {
                     iArr[Type.FLASHLIGHT.ordinal()] = 4;
-                } catch (NoSuchFieldError unused) {
+                } catch (NoSuchFieldError unused4) {
                 }
                 $EnumSwitchMapping$0 = iArr;
             }
@@ -156,7 +156,7 @@ public final /* data */ class IslandSystemStatus {
         Intrinsics.checkNotNullParameter(type, "type");
         Intrinsics.checkNotNullParameter(sourceLabel, "sourceLabel");
         Intrinsics.checkNotNullParameter(connInfo, "connInfo");
-        return new IslandSystemStatus(icon, title, text, durationMs, persistentMs, persistent, type, sourceLabel, connInfo);
+        return new IslandSystemStatus(icon, title, text, durationMs, persistent, type, sourceLabel, connInfo);
     }
 
     public boolean equals(Object other) {
@@ -207,6 +207,6 @@ public final /* data */ class IslandSystemStatus {
     }
 
     public String toString() {
-        return "IslandSystemStatus(icon=" + this.icon + ", title=" + this.title + ", text=" + this.text + ", durationMs=" + this.durationMs + ", persistent=" + this.persistent + ", sourceLabel=" + this.sourceLabel + ", connInfo=" + this.connInfo + ")";
+        return "IslandSystemStatus(icon=" + this.icon + ", title=" + this.title + ", text=" + this.text + ", durationMs=" + this.durationMs + ", persistent=" + this.persistent + ", type=" + this.type + ", sourceLabel=" + this.sourceLabel + ", connInfo=" + this.connInfo + ")";
     }
 }
