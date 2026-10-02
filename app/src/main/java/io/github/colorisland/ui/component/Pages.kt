@@ -18,12 +18,13 @@ import top.yukonga.miuix.kmp.basic.TopAppBar
 /**
  * Miuix 风格页面骨架（移植自 HyperIsland 的 CollapsingPage 设计模式）。
  *
- * 与原版的差异：
+ * 与 HyperIsland 原版的差异：
  * - 去掉了毛玻璃顶栏（BarBlurHost / BlurredBar），那些是 HyperIsland 基于
  *   miuix-blur 自建的效果组件，移植成本高且与 ColorIsland 无关；
- * - 去掉了 scrollBehavior（miuix 0.9.4 未提供 HyperIsland 源码中引用的
- *   MiuixScrollBehavior，仅有 ExitUntilCollapsedScrollBehavior 且需要
- *   TopAppBarState，收益不明显），改用固定大标题顶栏，视觉仍是纯正 Miuix 风格。
+ * - 去掉了 scrollBehavior：miuix 0.9.4 并未提供 HyperIsland 源码中引用的
+ *   MiuixScrollBehavior（仅有 ExitUntilCollapsedScrollBehavior 且需要
+ *   TopAppBarState），收益不明显，故改用固定大标题顶栏，
+ *   视觉上仍是纯正 Miuix 设置页风格。
  *
  * 结构：Scaffold( TopAppBar(title + largeTitle) ) { LazyColumn { content } }
  */
