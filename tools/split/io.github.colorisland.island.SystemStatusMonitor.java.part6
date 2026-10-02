@@ -1,0 +1,122 @@
+                return str;
+            }
+        }
+        return "系统状态";
+    }
+
+    private final void stopConnRefresh() {
+        this.connHandler.removeCallbacks(this.connRefresh);
+    }
+
+    public final void onFlashlightChanged(boolean enabled) {
+        if (Intrinsics.areEqual(this.lastFlashlight, Boolean.valueOf(enabled))) {
+            return;
+        }
+        this.lastFlashlight = Boolean.valueOf(enabled);
+        IslandController.INSTANCE.setFlashlightEnabled(enabled);
+        Log.i(TAG, "onFlashlightChanged -> " + enabled);
+        showTransient(IslandSystemStatus.Type.FLASHLIGHT, R.drawable.ic_status_flashlight, enabled ? "手电筒已开启" : "手电筒已关闭", "", enabled);
+    }
+
+    public final void onHotspotChanged$app_release(boolean enabled) {
+        if (Intrinsics.areEqual(this.lastApEnabled, Boolean.valueOf(enabled))) {
+            return;
+        }
+        this.lastApEnabled = Boolean.valueOf(enabled);
+        IslandController.INSTANCE.setHotspotEnabled(enabled);
+        if (enabled) {
+            startConnRefresh();
+        } else {
+            stopConnRefresh();
+        }
+        showPersistent(IslandSystemStatus.Type.HOTSPOT, R.drawable.ic_status_hotspot, enabled ? "个人热点已开启" : "个人热点已关闭", enabled, enabled ? readHotspotConnInfo() : "");
+    }
+
+    public final void onScreenRecordChanged(boolean recording) {
+        showPersistent$default(this, IslandSystemStatus.Type.SCREEN_RECORD, R.drawable.ic_status_record, recording ? "屏幕录制中" : "录屏已结束", recording, null, 16, null);
+    }
+
+    public final void register() {
+        Object m5221constructorimpl;
+        if (this.receiver != null) {
+            return;
+        }
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction("android.intent.action.BATTERY_CHANGED");
+        intentFilter.addAction("android.net.wifi.WIFI_AP_STATE_CHANGED");
+        intentFilter.addAction("oplus.intent.action.WIFI_AP_STATE_CHANGED");
+        BroadcastReceiver broadcastReceiver = new BroadcastReceiver() { // from class: io.github.colorisland.island.SystemStatusMonitor$register$r$1
+            @Override // android.content.BroadcastReceiver
+            public void onReceive(Context context, Intent intent) {
+                Object m5221constructorimpl2;
+                if (intent == null) {
+                    return;
+                }
+                SystemStatusMonitor systemStatusMonitor = SystemStatusMonitor.this;
+                try {
+                    systemStatusMonitor.handle(intent);
+                    m5221constructorimpl2 = KResult.success(Unit.INSTANCE);
+                } catch (Throwable th) {
+                    m5221constructorimpl2 = KResult.success(KResult.createFailure(th));
+                }
+                Throwable m5224exceptionOrNullimpl = KResult.exceptionOrNullimpl(m5221constructorimpl2);
+                if (m5224exceptionOrNullimpl != null) {
+                    Log.e("ColorIslandStatus", "handle " + intent.getAction() + " failed", m5224exceptionOrNullimpl);
+                }
+            }
+        };
+        this.receiver = broadcastReceiver;
+        try {
+            SystemStatusMonitor systemStatusMonitor = this;
+            m5221constructorimpl = KResult.success(this.context.registerReceiver(broadcastReceiver, intentFilter, 4));
+        } catch (Throwable th) {
+            m5221constructorimpl = KResult.success(KResult.createFailure(th));
+        }
+        if (!KResult.isSuccessimpl(m5221constructorimpl)) {
+            this.receiver = null;
+            Log.e(TAG, "registerReceiver failed");
+        } else {
+            registerTorchCallback();
+            IslandController.INSTANCE.setStatusSink(new Function2() { // from class: io.github.colorisland.island.SystemStatusMonitor$$ExternalSyntheticLambda1
+                @Override // kotlin.jvm.functions.Function2
+                public final Object invoke(Object obj, Object obj2) {
+                    Unit register$lambda$9;
+                    register$lambda$9 = SystemStatusMonitor.register$lambda$9(SystemStatusMonitor.this, (IslandSystemStatus.Type) obj, ((Boolean) obj2).booleanValue());
+                    return register$lambda$9;
+                }
+            });
+            Log.i(TAG, "SystemStatusMonitor registered");
+        }
+    }
+
+    public final void unregister() {
+        Object m5221constructorimpl;
+        Object m5221constructorimpl2;
+        BroadcastReceiver broadcastReceiver = this.receiver;
+        if (broadcastReceiver == null) {
+            return;
+        }
+        Unit unit = null;
+        this.receiver = null;
+        try {
+            SystemStatusMonitor systemStatusMonitor = this;
+            this.context.unregisterReceiver(broadcastReceiver);
+            m5221constructorimpl = KResult.success(Unit.INSTANCE);
+        } catch (Throwable th) {
+            m5221constructorimpl = KResult.success(KResult.createFailure(th));
+        }
+        Throwable m5224exceptionOrNullimpl = KResult.exceptionOrNullimpl(m5221constructorimpl);
+        if (m5224exceptionOrNullimpl != null) {
+            Log.w(TAG, "unregisterReceiver failed: " + m5224exceptionOrNullimpl.getMessage());
+        }
+        IslandController.INSTANCE.setStatusSink(null);
+        CameraManager.TorchCallback torchCallback = this.torchCallback;
+        if (torchCallback == null) {
+            return;
+        }
+        this.torchCallback = null;
+        try {
+            SystemStatusMonitor systemStatusMonitor2 = this;
+            Object systemService = this.context.getSystemService("camera");
+            CameraManager cameraManager = systemService instanceof CameraManager ? (CameraManager) systemService : null;
+            if (cameraManager != null) {
