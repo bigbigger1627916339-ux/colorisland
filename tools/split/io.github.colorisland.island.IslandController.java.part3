@@ -1,0 +1,543 @@
+        return Intrinsics.areEqual(it.getKey(), islandNotification.getKey());
+    }
+
+    private final boolean startTethering(Context ctx) {
+        Object systemService = ctx.getSystemService("wifi");
+        WifiManager wifiManager = systemService instanceof WifiManager ? (WifiManager) systemService : null;
+        if (wifiManager == null) {
+            return false;
+        }
+        try {
+            IslandController islandController = this;
+            Class<?> cls = Class.forName("android.net.IOnStartTetheringCallback");
+            wifiManager.getClass().getMethod("startTethering", Integer.TYPE, Boolean.TYPE, cls).invoke(wifiManager, 0, false, Proxy.newProxyInstance(cls.getClassLoader(), new Class[]{cls}, new InvocationHandler() { // from class: io.github.colorisland.island.IslandController$$ExternalSyntheticLambda26
+                @Override // java.lang.reflect.InvocationHandler
+                public final Object invoke(Object obj, Method method, Object[] objArr) {
+                    Unit startTethering$lambda$61$lambda$60;
+                    startTethering$lambda$61$lambda$60 = IslandController.startTethering$lambda$61$lambda$60(obj, method, objArr);
+                    return startTethering$lambda$61$lambda$60;
+                }
+            }));
+            return true;
+        } catch (Throwable th) {
+            Throwable m5224exceptionOrNullimpl = KResult.exceptionOrNullimpl(KResult.success(KResult.createFailure(th)));
+            if (m5224exceptionOrNullimpl != null) {
+                Log.w("ColorIsland", "startTethering via WifiManager failed: " + m5224exceptionOrNullimpl.getClass().getSimpleName());
+            }
+            return startTetheringViaShell(wifiManager);
+        }
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public static final Unit startTethering$lambda$61$lambda$60(Object obj, Method method, Object[] objArr) {
+        return Unit.INSTANCE;
+    }
+
+    /* JADX WARN: Removed duplicated region for block: B:44:0x00fe  */
+    /*
+        Code decompiled incorrectly, please refer to instructions dump.
+        To view partially-correct add '--show-bad-code' argument
+    */
+        /**
+     * 通过 shell 命令兜底开启个人热点（v1.0 smali startTetheringViaShell 逐条翻译）。
+     *
+     * 反射读取 SoftApConfiguration 的 SSID / 安全类型 / 密码，
+     * 组装 {@code cmd wifi start-softap <ssid> <security> [passphrase]} 执行。
+     * 任一环节（反射、执行）失败均返回 false，由调用方决定后续兜底策略。
+     */
+    private final boolean startTetheringViaShell(WifiManager wifiManager) {
+        try {
+            // 1) 反射获取 SoftApConfiguration（部分 ROM 隐藏 API）
+            Object softApConfig = wifiManager.getClass()
+                    .getMethod("getSoftApConfiguration", new Class[0])
+                    .invoke(wifiManager, new Object[0]);
+            if (softApConfig == null) {
+                return false;
+            }
+            // 2) 反射读取 SSID
+            Object ssidResult = softApConfig.getClass()
+                    .getMethod("getSsid", new Class[0])
+                    .invoke(softApConfig, new Object[0]);
+            String ssid = ssidResult instanceof String ? (String) ssidResult : null;
+            if (ssid == null) {
+                return false;
+            }
+            // 3) 反射读取安全类型（缺失时按 open 处理）
+            Object securityTypeResult = softApConfig.getClass()
+                    .getMethod("getSecurityType", new Class[0])
+                    .invoke(softApConfig, new Object[0]);
+            Integer securityTypeBoxed = securityTypeResult instanceof Integer ? (Integer) securityTypeResult : null;
+            int securityType = securityTypeBoxed != null ? securityTypeBoxed : 0;
+            // 4) 反射读取密码（失败按无密码处理）
+            String passphrase;
+            try {
+                Object passphraseResult = softApConfig.getClass()
+                        .getMethod("getPassphrase", new Class[0])
+                        .invoke(softApConfig, new Object[0]);
+                passphrase = passphraseResult instanceof String ? (String) passphraseResult : null;
+            } catch (Throwable th) {
+                passphrase = null;
+            }
+            // 5) 安全类型映射为 shell 参数字符串
+            String security;
+            switch (securityType) {
+                case 1:
+                    security = "wpa2";
+                    break;
+                case 2:
+                    security = "wpa3";
+                    break;
+                case 3:
+                    security = "wpa3_transition";
+                    break;
+                default:
+                    security = "wpa2";
+                    break;
+            }
+            // 6) 组装命令：有密码时附带密码，否则按 open 热点开启
+            String[] command;
+            if (passphrase != null && passphrase.length() != 0) {
+                command = new String[]{"cmd", "wifi", "start-softap", ssid, security, passphrase};
+            } else {
+                command = new String[]{"cmd", "wifi", "start-softap", ssid, "open"};
+            }
+            // 7) 执行并等待完成
+            Runtime.getRuntime().exec(command).waitFor();
+            return true;
+        } catch (Throwable th) {
+            return false;
+        }
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public static final void statusHideRunnable$lambda$5() {
+        INSTANCE.hideSystemStatus();
+    }
+
+    private final boolean stopTethering(Context ctx) {
+        Object m5221constructorimpl;
+        try {
+            IslandController islandController = this;
+            Object systemService = ctx.getSystemService("connectivity");
+            ConnectivityManager connectivityManager = systemService instanceof ConnectivityManager ? (ConnectivityManager) systemService : null;
+            if (connectivityManager == null) {
+                return false;
+            }
+            connectivityManager.getClass().getMethod("stopTethering", Integer.TYPE).invoke(connectivityManager, 0);
+            return true;
+        } catch (Throwable th) {
+            Throwable m5224exceptionOrNullimpl = KResult.exceptionOrNullimpl(KResult.success(KResult.createFailure(th)));
+            if (m5224exceptionOrNullimpl != null) {
+                Log.w("ColorIsland", "stopTethering via ConnectivityManager failed: " + m5224exceptionOrNullimpl.getClass().getSimpleName());
+            }
+            try {
+                Runtime.getRuntime().exec(new String[]{"cmd", "wifi", "stop-softap"}).waitFor();
+                m5221constructorimpl = KResult.success(true);
+            } catch (Throwable th2) {
+                m5221constructorimpl = KResult.success(KResult.createFailure(th2));
+            }
+            if (KResult.exceptionOrNullimpl(m5221constructorimpl) != null) {
+                m5221constructorimpl = false;
+            }
+            return ((Boolean) m5221constructorimpl).booleanValue();
+        }
+    }
+
+    private final void syncHotspotState(Context ctx) {
+        Object m5221constructorimpl;
+        boolean booleanValue;
+        Object systemService = ctx.getSystemService("wifi");
+        WifiManager wifiManager = systemService instanceof WifiManager ? (WifiManager) systemService : null;
+        if (wifiManager == null) {
+            return;
+        }
+        try {
+            IslandController islandController = this;
+            Object invoke = wifiManager.getClass().getMethod("isWifiApEnabled", new Class[0]).invoke(wifiManager, new Object[0]);
+            m5221constructorimpl = KResult.success(invoke instanceof Boolean ? (Boolean) invoke : null);
+        } catch (Throwable th) {
+            m5221constructorimpl = KResult.success(KResult.createFailure(th));
+        }
+        Boolean bool = (Boolean) (KResult.isFailureimpl(m5221constructorimpl) ? null : m5221constructorimpl);
+        if (bool == null || (booleanValue = bool.booleanValue()) == hotspotEnabled) {
+            return;
+        }
+        if (getVERBOSE()) {
+            Log.i("ColorIsland", "syncHotspotState: " + booleanValue);
+        }
+        hotspotEnabled = booleanValue;
+        SystemStatusMonitor systemStatusMonitor = statusMonitor;
+        if (systemStatusMonitor != null) {
+            systemStatusMonitor.onHotspotChanged$app_release(booleanValue);
+        }
+    }
+
+    private final void takeOverSystemNotification(final StatusBarNotification sbn) {
+        Object m5221constructorimpl;
+        Unit unit;
+        List<StatusBarNotification> list = takenOver;
+        if (!(list instanceof Collection) || !list.isEmpty()) {
+            Iterator it = list.iterator();
+            while (it.hasNext()) {
+                if (Intrinsics.areEqual(((StatusBarNotification) it.next()).getKey(), sbn.getKey())) {
+                    return;
+                }
+            }
+        }
+        takenOver.add(sbn);
+        Set<String> set = selfCancelled;
+        String key = sbn.getKey();
+        Intrinsics.checkNotNullExpressionValue(key, "getKey(...)");
+        set.add(key);
+        try {
+            IslandController islandController = this;
+            Function1<? super StatusBarNotification, Unit> function1 = cancelSystemNotification;
+            if (function1 != null) {
+                function1.invoke(sbn);
+                unit = Unit.INSTANCE;
+            } else {
+                unit = null;
+            }
+            m5221constructorimpl = KResult.success(unit);
+        } catch (Throwable th) {
+            m5221constructorimpl = KResult.success(KResult.createFailure(th));
+        }
+        Throwable m5224exceptionOrNullimpl = KResult.exceptionOrNullimpl(m5221constructorimpl);
+        if (m5224exceptionOrNullimpl != null) {
+            Log.w("ColorIsland", "cancelSystemNotification failed: " + m5224exceptionOrNullimpl.getMessage());
+            CollectionsKt.removeAll((List) takenOver, new Function1() { // from class: io.github.colorisland.island.IslandController$$ExternalSyntheticLambda14
+                @Override // kotlin.jvm.functions.Function1
+                public final Object invoke(Object obj) {
+                    boolean takeOverSystemNotification$lambda$28$lambda$27;
+                    takeOverSystemNotification$lambda$28$lambda$27 = IslandController.takeOverSystemNotification$lambda$28$lambda$27(sbn, (StatusBarNotification) obj);
+                    return Boolean.valueOf(takeOverSystemNotification$lambda$28$lambda$27);
+                }
+            });
+            selfCancelled.remove(sbn.getKey());
+        }
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public static final boolean takeOverSystemNotification$lambda$28$lambda$27(StatusBarNotification statusBarNotification, StatusBarNotification it) {
+        Intrinsics.checkNotNullParameter(it, "it");
+        return Intrinsics.areEqual(it.getKey(), statusBarNotification.getKey());
+    }
+
+    private final void toggleFlashlight() {
+        final Context context = appContext;
+        if (context == null) {
+            return;
+        }
+        mainHandler.post(new Runnable() { // from class: io.github.colorisland.island.IslandController$$ExternalSyntheticLambda31
+            @Override // java.lang.Runnable
+            public final void run() {
+                IslandController.toggleFlashlight$lambda$54(context);
+            }
+        });
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public static final void toggleFlashlight$lambda$54(Context context) {
+        Object m5221constructorimpl;
+        String str;
+        IslandController islandController = INSTANCE;
+        try {
+            Object systemService = context.getSystemService("camera");
+            CameraManager cameraManager = systemService instanceof CameraManager ? (CameraManager) systemService : null;
+            if (cameraManager != null && ((str = torchCameraId) != null || (str = islandController.findTorchCameraId(cameraManager)) != null)) {
+                boolean z = !flashlightEnabled;
+                cameraManager.setTorchMode(str, z);
+                if (islandController.getVERBOSE()) {
+                    Log.d("ColorIsland", "toggleFlashlight: cameraId=" + str + " -> " + z);
+                }
+            }
+            m5221constructorimpl = KResult.success(Unit.INSTANCE);
+        } catch (Throwable th) {
+            m5221constructorimpl = KResult.success(KResult.createFailure(th));
+        }
+        Throwable m5224exceptionOrNullimpl = KResult.exceptionOrNullimpl(m5221constructorimpl);
+        if (m5224exceptionOrNullimpl != null) {
+            Log.w("ColorIsland", "toggleFlashlight failed: " + m5224exceptionOrNullimpl.getClass().getSimpleName());
+        }
+    }
+
+    private final void toggleHotspot() {
+        final Context context = appContext;
+        if (context == null) {
+            return;
+        }
+        final boolean z = !hotspotEnabled;
+        if (getVERBOSE()) {
+            Log.d("ColorIsland", "toggleHotspot -> " + z);
+        }
+        ioExecutor.execute(new Runnable() { // from class: io.github.colorisland.island.IslandController$$ExternalSyntheticLambda15
+            @Override // java.lang.Runnable
+            public final void run() {
+                IslandController.toggleHotspot$lambda$59(z, context);
+            }
+        });
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public static final void toggleHotspot$lambda$59(boolean z, final Context context) {
+        Object m5221constructorimpl;
+        IslandController islandController = INSTANCE;
+        try {
+            m5221constructorimpl = KResult.success(Boolean.valueOf(z ? islandController.startTethering(context) : islandController.stopTethering(context)));
+        } catch (Throwable th) {
+            m5221constructorimpl = KResult.success(KResult.createFailure(th));
+        }
+        if (KResult.exceptionOrNullimpl(m5221constructorimpl) != null) {
+            m5221constructorimpl = false;
+        }
+        boolean booleanValue = ((Boolean) m5221constructorimpl).booleanValue();
+        if (INSTANCE.getVERBOSE()) {
+            Log.d("ColorIsland", "toggleHotspot done -> " + z + " ok=" + booleanValue);
+        }
+        mainHandler.postDelayed(new Runnable() { // from class: io.github.colorisland.island.IslandController$$ExternalSyntheticLambda11
+            @Override // java.lang.Runnable
+            public final void run() {
+                IslandController.toggleHotspot$lambda$59$lambda$58(context);
+            }
+        }, 600L);
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public static final void toggleHotspot$lambda$59$lambda$58(Context context) {
+        INSTANCE.syncHotspotState(context);
+    }
+
+    public final void cancelDispatched(final String id) {
+        Intrinsics.checkNotNullParameter(id, "id");
+        mainHandler.post(new Runnable() { // from class: io.github.colorisland.island.IslandController$$ExternalSyntheticLambda22
+            @Override // java.lang.Runnable
+            public final void run() {
+                IslandController.cancelDispatched$lambda$41(id);
+            }
+        });
+    }
+
+    public final void dismissCurrent() {
+        if (currentStatus != null) {
+            hideSystemStatus();
+        } else {
+            hide();
+        }
+    }
+
+    public final Function1<? super StatusBarNotification, Unit> getCancelSystemNotification() {
+        return cancelSystemNotification;
+    }
+
+    public final boolean getFlashlightEnabled() {
+        return flashlightEnabled;
+    }
+
+    public final boolean getHotspotEnabled() {
+        return hotspotEnabled;
+    }
+
+    public final boolean isHotspotStatusExpanded() {
+        IslandSystemStatus s = currentStatus;
+        return expanded && s != null && s.getType() == IslandSystemStatus.Type.HOTSPOT;
+    }
+
+    private final boolean isCallNotification(StatusBarNotification sbn) {
+        Notification n = sbn.getNotification();
+        if (n == null) {
+            return false;
+        }
+        if (Notification.CATEGORY_CALL.equals(n.category)) {
+            return true;
+        }
+        String pkg = sbn.getPackageName();
+        if (pkg != null) {
+            String lower = pkg.toLowerCase();
+            if ((lower.contains("incallui") || lower.contains("dialer") || lower.contains("telecom") || lower.contains("phone") || lower.contains("callui")) && ((n.flags & 2) != 0 || Notification.CATEGORY_CALL.equals(n.category))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public final Function1<? super StatusBarNotification, Unit> getRestoreSystemNotification() {
+        return restoreSystemNotification;
+    }
+
+    public final SystemStatusMonitor getStatusMonitor() {
+        return statusMonitor;
+    }
+
+    public final Function2<? super IslandSystemStatus.Type, ? super Boolean, Unit> getStatusSink() {
+        return statusSink;
+    }
+
+    public final String getTorchCameraId() {
+        return torchCameraId;
+    }
+
+    public final void hideSystemStatus() {
+        mainHandler.post(new Runnable() { // from class: io.github.colorisland.island.IslandController$$ExternalSyntheticLambda10
+            @Override // java.lang.Runnable
+            public final void run() {
+                IslandController.hideSystemStatus$lambda$47();
+            }
+        });
+    }
+
+    public final void hideSystemStatusDelayed(long delayMs) {
+        mainHandler.postDelayed(new Runnable() { // from class: io.github.colorisland.island.IslandController$$ExternalSyntheticLambda12
+            @Override // java.lang.Runnable
+            public final void run() {
+                IslandController.hideSystemStatusDelayed$lambda$48();
+            }
+        }, delayMs);
+    }
+
+    public final void init(Context context) {
+        Intrinsics.checkNotNullParameter(context, "context");
+        if (initialized) {
+            return;
+        }
+        synchronized (this) {
+            if (initialized) {
+                return;
+            }
+            appContext = context.getApplicationContext();
+            initWallTimeMs = System.currentTimeMillis();
+            Context context2 = appContext;
+            Intrinsics.checkNotNull(context2);
+            window = new IslandWindow(context2);
+            IslandConfig.INSTANCE.setOnYOffsetChanged(new Function1() { // from class: io.github.colorisland.island.IslandController$$ExternalSyntheticLambda5
+                @Override // kotlin.jvm.functions.Function1
+                public final Object invoke(Object obj) {
+                    Unit init$lambda$13$lambda$7;
+                    init$lambda$13$lambda$7 = IslandController.init$lambda$13$lambda$7(((Integer) obj).intValue());
+                    return init$lambda$13$lambda$7;
+                }
+            });
+            IslandConfig.INSTANCE.setOnSystemStatusDisabled(new Function0() { // from class: io.github.colorisland.island.IslandController$$ExternalSyntheticLambda6
+                @Override // kotlin.jvm.functions.Function0
+                public final Object invoke() {
+                    Unit init$lambda$13$lambda$8;
+                    init$lambda$13$lambda$8 = IslandController.init$lambda$13$lambda$8();
+                    return init$lambda$13$lambda$8;
+                }
+            });
+            IslandConfig.INSTANCE.setOnColorChanged(new Function0() { // from class: io.github.colorisland.island.IslandController$$ExternalSyntheticLambda7
+                @Override // kotlin.jvm.functions.Function0
+                public final Object invoke() {
+                    Unit init$lambda$13$lambda$10;
+                    init$lambda$13$lambda$10 = IslandController.init$lambda$13$lambda$10();
+                    return init$lambda$13$lambda$10;
+                }
+            });
+            IslandConfig.INSTANCE.setOnAvoidCutoutChanged(new Function0() { // from class: io.github.colorisland.island.IslandController$$ExternalSyntheticLambda8
+                @Override // kotlin.jvm.functions.Function0
+                public final Object invoke() {
+                    Unit init$lambda$13$lambda$12;
+                    init$lambda$13$lambda$12 = IslandController.init$lambda$13$lambda$12();
+                    return init$lambda$13$lambda$12;
+                }
+            });
+            initialized = true;
+            Log.i("ColorIsland", "IslandController.init done");
+        }
+    }
+
+    public final boolean isStatusShowing(IslandSystemStatus.Type type) {
+        Intrinsics.checkNotNullParameter(type, "type");
+        IslandSystemStatus islandSystemStatus = currentStatus;
+        return (islandSystemStatus != null ? islandSystemStatus.getType() : null) == type;
+    }
+
+    public final void onPosted(final StatusBarNotification sbn) {
+        Intrinsics.checkNotNullParameter(sbn, "sbn");
+        mainHandler.post(new Runnable() { // from class: io.github.colorisland.island.IslandController$$ExternalSyntheticLambda27
+            @Override // java.lang.Runnable
+            public final void run() {
+                IslandController.onPosted$lambda$14(sbn);
+            }
+        });
+    }
+
+    public final void onRemoved(final StatusBarNotification sbn) {
+        Intrinsics.checkNotNullParameter(sbn, "sbn");
+        mainHandler.post(new Runnable() { // from class: io.github.colorisland.island.IslandController$$ExternalSyntheticLambda3
+            @Override // java.lang.Runnable
+            public final void run() {
+                IslandController.onRemoved$lambda$15(sbn);
+            }
+        });
+    }
+
+    public final void openNotification(IslandNotification notif) {
+        Unit unit;
+        Intrinsics.checkNotNullParameter(notif, "notif");
+        try {
+            IslandController islandController = this;
+            PendingIntent contentIntent = notif.getContentIntent();
+            if (contentIntent != null) {
+                contentIntent.send();
+                unit = Unit.INSTANCE;
+            } else {
+                unit = null;
+            }
+        } catch (Throwable th) {
+        }
+        hide();
+    }
+
+    public final void runAction(IslandAction action) {
+        Intrinsics.checkNotNullParameter(action, "action");
+        try {
+            IslandController islandController = this;
+            action.getIntent().send();
+        } catch (Throwable th) {
+        }
+        hide();
+    }
+
+    public final void seekNotification(final IslandNotification notif, final float fraction) {
+        Intrinsics.checkNotNullParameter(notif, "notif");
+        final Context context = appContext;
+        if (context == null) {
+            return;
+        }
+        mainHandler.post(new Runnable() { // from class: io.github.colorisland.island.IslandController$$ExternalSyntheticLambda30
+            @Override // java.lang.Runnable
+            public final void run() {
+                IslandController.seekNotification$lambda$74(context, fraction, notif);
+            }
+        });
+    }
+
+    public final void setCancelSystemNotification(Function1<? super StatusBarNotification, Unit> function1) {
+        cancelSystemNotification = function1;
+    }
+
+    public final void setFlashlightEnabled(boolean z) {
+        flashlightEnabled = z;
+    }
+
+    public final void setHotspotEnabled(boolean z) {
+        hotspotEnabled = z;
+    }
+
+    public final void setRestoreSystemNotification(Function1<? super StatusBarNotification, Unit> function1) {
+        restoreSystemNotification = function1;
+    }
+
+    public final void setStatusMonitor(SystemStatusMonitor systemStatusMonitor) {
+        statusMonitor = systemStatusMonitor;
+    }
+
+    public final void setStatusSink(Function2<? super IslandSystemStatus.Type, ? super Boolean, Unit> function2) {
+        statusSink = function2;
+    }
+
+    public final void setTorchCameraId(String str) {
+        torchCameraId = str;
+    }
+
+    public final boolean shouldSuppressCapsuleText(String des) {
