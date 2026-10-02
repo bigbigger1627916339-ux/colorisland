@@ -1,0 +1,29 @@
+# Gradle / Android 构建产物
+.gradle/
+.gradle-tmp/
+build/
+app/build/
+.kotlin/
+
+# 构建日志
+*.log
+.gradle-build.log
+build.log
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.DS_Store
+
+# 本地配置（含机器相关路径，不入库）
+local.properties
+
+# 二进制产物（APK 通过 GitHub Releases 分发）
+*.apk
+*.apk.idsig
+*.dex
+
+# 密钥库（绝不入库）
+*.keystore
+*.jks
