@@ -1,0 +1,105 @@
+    /* JADX WARN: Removed duplicated region for block: B:100:0x02c4 A[Catch: all -> 0x035f, TryCatch #8 {all -> 0x035f, blocks: (B:3:0x0004, B:5:0x0016, B:8:0x035a, B:17:0x001f, B:21:0x0050, B:163:0x0086, B:166:0x008d, B:169:0x0092, B:175:0x00c0, B:178:0x00c7, B:86:0x0272, B:89:0x027e, B:91:0x0294, B:92:0x02ac, B:95:0x02b4, B:98:0x02bb, B:100:0x02c4, B:101:0x02c7, B:103:0x02e1, B:105:0x02ea, B:106:0x02ed, B:107:0x0309, B:109:0x031a, B:113:0x0322, B:154:0x0268, B:182:0x00b6, B:28:0x00ef, B:39:0x012e, B:42:0x0135, B:45:0x013a, B:51:0x0164, B:54:0x016b, B:58:0x015a, B:63:0x0124, B:186:0x007c, B:157:0x00e5, B:189:0x0046, B:33:0x00f8, B:35:0x010c, B:37:0x0112, B:38:0x011e, B:27:0x00cb, B:171:0x0094, B:173:0x00ac, B:174:0x00b0, B:20:0x002c, B:65:0x016d, B:72:0x01ac, B:75:0x01b3, B:77:0x01b7, B:80:0x01c3, B:82:0x01da, B:85:0x025e, B:115:0x01e6, B:116:0x01eb, B:118:0x01f1, B:121:0x0215, B:124:0x0221, B:127:0x022c, B:129:0x023a, B:131:0x0248, B:134:0x0256, B:137:0x025a, B:152:0x01a2, B:68:0x0170, B:70:0x0198, B:71:0x019c, B:47:0x013c, B:49:0x0150, B:50:0x0154, B:159:0x005a, B:161:0x0072, B:162:0x0076), top: B:2:0x0004, inners: #1, #2, #3, #4, #5, #6, #7 }] */
+    /* JADX WARN: Removed duplicated region for block: B:118:0x01f1 A[Catch: all -> 0x0267, TryCatch #5 {all -> 0x0267, blocks: (B:65:0x016d, B:72:0x01ac, B:75:0x01b3, B:77:0x01b7, B:80:0x01c3, B:82:0x01da, B:85:0x025e, B:115:0x01e6, B:116:0x01eb, B:118:0x01f1, B:121:0x0215, B:124:0x0221, B:127:0x022c, B:129:0x023a, B:131:0x0248, B:134:0x0256, B:137:0x025a, B:152:0x01a2, B:68:0x0170, B:70:0x0198, B:71:0x019c), top: B:64:0x016d, outer: #8, inners: #0 }] */
+    /* JADX WARN: Removed duplicated region for block: B:150:0x019b  */
+    /* JADX WARN: Removed duplicated region for block: B:70:0x0198 A[Catch: all -> 0x01a1, TryCatch #0 {all -> 0x01a1, blocks: (B:68:0x0170, B:70:0x0198, B:71:0x019c), top: B:67:0x0170, outer: #5 }] */
+    /* JADX WARN: Removed duplicated region for block: B:74:0x01b2  */
+    /* JADX WARN: Removed duplicated region for block: B:88:0x027d  */
+    /* JADX WARN: Removed duplicated region for block: B:91:0x0294 A[Catch: all -> 0x035f, TryCatch #8 {all -> 0x035f, blocks: (B:3:0x0004, B:5:0x0016, B:8:0x035a, B:17:0x001f, B:21:0x0050, B:163:0x0086, B:166:0x008d, B:169:0x0092, B:175:0x00c0, B:178:0x00c7, B:86:0x0272, B:89:0x027e, B:91:0x0294, B:92:0x02ac, B:95:0x02b4, B:98:0x02bb, B:100:0x02c4, B:101:0x02c7, B:103:0x02e1, B:105:0x02ea, B:106:0x02ed, B:107:0x0309, B:109:0x031a, B:113:0x0322, B:154:0x0268, B:182:0x00b6, B:28:0x00ef, B:39:0x012e, B:42:0x0135, B:45:0x013a, B:51:0x0164, B:54:0x016b, B:58:0x015a, B:63:0x0124, B:186:0x007c, B:157:0x00e5, B:189:0x0046, B:33:0x00f8, B:35:0x010c, B:37:0x0112, B:38:0x011e, B:27:0x00cb, B:171:0x0094, B:173:0x00ac, B:174:0x00b0, B:20:0x002c, B:65:0x016d, B:72:0x01ac, B:75:0x01b3, B:77:0x01b7, B:80:0x01c3, B:82:0x01da, B:85:0x025e, B:115:0x01e6, B:116:0x01eb, B:118:0x01f1, B:121:0x0215, B:124:0x0221, B:127:0x022c, B:129:0x023a, B:131:0x0248, B:134:0x0256, B:137:0x025a, B:152:0x01a2, B:68:0x0170, B:70:0x0198, B:71:0x019c, B:47:0x013c, B:49:0x0150, B:50:0x0154, B:159:0x005a, B:161:0x0072, B:162:0x0076), top: B:2:0x0004, inners: #1, #2, #3, #4, #5, #6, #7 }] */
+    /*
+        Code decompiled incorrectly, please refer to instructions dump.
+        To view partially-correct add '--show-bad-code' argument
+    */
+        /**
+     * 读取个人热点连接信息（v1.0 smali readHotspotConnInfo 逐条翻译）。
+     *
+     * 依次尝试：新 API SoftApConfiguration（getSsid/getPassphrase）→
+     * 旧 API WifiApConfiguration（SSID/preSharedKey 字段）→
+     * 通过 /proc/net/arp 统计已连接客户端数（排除 AP 自身网卡）。
+     * 最终格式：{@code SSID：xxx · 密码：xxx · 已连接 N 台}，各段按可用性拼接。
+     * 任何环节失败仅影响对应字段，整体异常时返回空串。
+     */
+    public final String readHotspotConnInfo() {
+        try {
+            // 1) 获取 WifiManager（系统服务名称为字面量 "wifi"）
+            Object wifiManager = context.getSystemService("wifi");
+            final String[] ssidRef = new String[]{""};
+            final String[] pwdRef = new String[]{null};
+            // 2) 优先反射新 API SoftApConfiguration
+            Object softApConfig = null;
+            try {
+                if (wifiManager != null) {
+                    softApConfig = wifiManager.getClass()
+                            .getMethod("getSoftApConfiguration", new Class[0])
+                            .invoke(wifiManager, new Object[0]);
+                }
+            } catch (Throwable th) {
+                softApConfig = null;
+            }
+            if (softApConfig != null) {
+                // 2.1) 新 API：getSsid / getPassphrase
+                try {
+                    Object ssidResult = softApConfig.getClass()
+                            .getMethod("getSsid", new Class[0])
+                            .invoke(softApConfig, new Object[0]);
+                    ssidRef[0] = ssidResult instanceof String ? (String) ssidResult : "";
+                } catch (Throwable th) {
+                    ssidRef[0] = "";
+                }
+                try {
+                    Object pwdResult = softApConfig.getClass()
+                            .getMethod("getPassphrase", new Class[0])
+                            .invoke(softApConfig, new Object[0]);
+                    pwdRef[0] = pwdResult instanceof String ? (String) pwdResult : null;
+                } catch (Throwable th) {
+                    pwdRef[0] = null;
+                }
+            } else {
+                // 3) 回退旧 API WifiApConfiguration（字段读取）
+                Object wifiApConfig = null;
+                try {
+                    if (wifiManager != null) {
+                        wifiApConfig = wifiManager.getClass()
+                                .getMethod("getWifiApConfiguration", new Class[0])
+                                .invoke(wifiManager, new Object[0]);
+                    }
+                } catch (Throwable th) {
+                    wifiApConfig = null;
+                }
+                if (wifiApConfig != null) {
+                    // 3.1) SSID 字段（去除首尾引号）
+                    try {
+                        Object ssidField = wifiApConfig.getClass()
+                                .getField("SSID").get(wifiApConfig);
+                        String ssid = ssidField instanceof String ? (String) ssidField : null;
+                        ssidRef[0] = ssid != null ? trimQuotes(ssid) : "";
+                    } catch (Throwable th) {
+                        ssidRef[0] = "";
+                    }
+                    // 3.2) preSharedKey 字段
+                    try {
+                        Object pskField = wifiApConfig.getClass()
+                                .getField("preSharedKey").get(wifiApConfig);
+                        pwdRef[0] = pskField instanceof String ? (String) pskField : null;
+                    } catch (Throwable th) {
+                        pwdRef[0] = null;
+                    }
+                }
+            }
+            // 4) 反射读取 wifi.interface 系统属性（AP 自身网卡名）
+            String iface = "";
+            try {
+                Object ifaceResult = Class.forName("android.os.SystemProperties")
+                        .getMethod("get", String.class, String.class)
+                        .invoke(null, "wifi.interface", "");
+                if (ifaceResult instanceof String) {
+                    String ifaceStr = (String) ifaceResult;
+                    if (ifaceStr != null && !ifaceStr.trim().isEmpty()) {
+                        iface = ifaceStr;
+                    }
+                }
+            } catch (Throwable th) {
+                iface = "";
+            }
+            // 5) 解析 /proc/net/arp 统计客户端（失败记 -1）
+            int clients = -1;
+            try {
