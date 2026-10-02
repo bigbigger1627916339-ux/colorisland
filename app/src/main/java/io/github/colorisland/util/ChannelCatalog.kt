@@ -1,7 +1,7 @@
-package io.github.colorisland.util
+package io.github.colorisland.util;
 
-import io.github.colorisland.data.ChannelItem
-import org.json.JSONObject
+import io.github.colorisland.data.ChannelItem;
+import org.json.JSONObject;
 
 /**
  * 渠道目录 JSON 解析器（从 AppsPage 提取的纯逻辑，便于 JVM 单元测试）。
