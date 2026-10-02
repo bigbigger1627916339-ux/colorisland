@@ -122,7 +122,7 @@ public final class IslandView extends FrameLayout {
     }
 
     /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
-    /* JADX WARN: Type inference failed for?? r5v6, types: [io.github.colorisland.island.IslandView$indeterminateRunnable$1] */
+    /* JADX WARN: Type inference failed for: r5v6, types: [io.github.colorisland.island.IslandView$indeterminateRunnable$1] */
     public IslandView(final Context context) {
         super(context);
         Intrinsics.checkNotNullParameter(context, "context");
