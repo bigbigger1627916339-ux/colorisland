@@ -1,0 +1,69 @@
+            this.expandedRoot.animate().alpha(1.0f).setDuration(j).setInterpolator(new DecelerateInterpolator()).withEndAction(runnable).start();
+            this.compactRoot.animate().alpha(0.0f).setDuration(j / 2).withEndAction(new Runnable() { // from class: io.github.colorisland.island.IslandView$$ExternalSyntheticLambda6
+                @Override // java.lang.Runnable
+                public final void run() {
+                    IslandView.setExpanded$lambda$21(IslandView.this);
+                }
+            }).start();
+        } else {
+            this.compactRoot.setVisibility(0);
+            this.compactRoot.animate().alpha(1.0f).setDuration(j).setInterpolator(new DecelerateInterpolator()).withEndAction(runnable).start();
+            this.expandedRoot.animate().alpha(0.0f).setDuration(j / 2).withEndAction(new Runnable() { // from class: io.github.colorisland.island.IslandView$$ExternalSyntheticLambda7
+                @Override // java.lang.Runnable
+                public final void run() {
+                    IslandView.setExpanded$lambda$22(IslandView.this);
+                }
+            }).start();
+        }
+        applyCurrentSize(animate);
+    }
+
+    // app 图标弹入：alpha + translationY 淡入上滑(不缩放，边缘锐利)
+    private final void popIcon(ImageView icon) {
+        icon.setAlpha(0.0f);
+        icon.setTranslationY(dp(6.0f));
+        icon.animate().alpha(1.0f).translationY(0.0f).setDuration(240L).setStartDelay(40L).start();
+    }
+
+    // 展开内容错落淡入：标题/正文/连接信息/操作按钮依次从下方滑入
+    private final void staggerSlideInExpanded() {
+        View[] views = {this.expTitle, this.expText, this.expConnInfo, this.actionsRow};
+        for (int i = 0; i < views.length; i++) {
+            View v = views[i];
+            v.animate().cancel();
+            v.setTranslationY(dp(8.0f));
+            v.animate().translationY(0.0f).setDuration(260L).setStartDelay(40L + (i * 45L)).setInterpolator(new DecelerateInterpolator()).start();
+        }
+    }
+
+    // 收起时复位展开内容偏移，避免下次展开位置错乱
+    private final void resetExpandedContentOffset() {
+        View[] views = {this.expTitle, this.expText, this.expConnInfo, this.actionsRow};
+        for (View v : views) {
+            v.animate().cancel();
+            v.setTranslationY(0.0f);
+        }
+    }
+
+    public final void setListener(Listener listener) {
+        this.listener = listener;
+    }
+
+    public final void setSizeChangeListener(Function3<? super Integer, ? super Integer, ? super Boolean, Unit> function3) {
+        this.sizeChangeListener = function3;
+    }
+
+    public final void updateConnInfo(String info) {
+        IslandSystemStatus islandSystemStatus;
+        Intrinsics.checkNotNullParameter(info, "info");
+        if (this.statusMode && (islandSystemStatus = this.status) != null && islandSystemStatus.getType() == IslandSystemStatus.Type.HOTSPOT) {
+            String str = info;
+            if (!(!StringsKt.isBlank(str))) {
+                this.expConnInfo.setVisibility(8);
+            } else {
+                this.expConnInfo.setText(str);
+                this.expConnInfo.setVisibility(0);
+            }
+        }
+    }
+}

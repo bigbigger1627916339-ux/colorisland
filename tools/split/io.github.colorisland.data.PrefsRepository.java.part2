@@ -1,0 +1,181 @@
+                    setDisabledChannels(loadDisabledChannels());
+                    return;
+                }
+                return;
+            case 354393908:
+                if (!key.equals("sys_status_hotspot")) {
+                    return;
+                }
+                break;
+            case 654604306:
+                if (key.equals("sys_status_persistent")) {
+                    setSystemStatusPersistent(prefs.getBoolean("sys_status_persistent", false));
+                    return;
+                }
+                return;
+            case 727965832:
+                if (key.equals("compact_height_dp")) {
+                    setCompactHeightDp(prefs.getInt("compact_height_dp", 34));
+                    return;
+                }
+                return;
+            case 748688342:
+                if (key.equals("avoid_cutout")) {
+                    setAvoidCutout(prefs.getBoolean("avoid_cutout", true));
+                    return;
+                }
+                return;
+            case 987906456:
+                if (key.equals("island_accent_color")) {
+                    setIslandAccentColor(prefs.getInt("island_accent_color", IslandConfig.DEFAULT_ACCENT_COLOR));
+                    return;
+                }
+                return;
+            case 1199700009:
+                if (!key.equals("sys_status_screen_record")) {
+                    return;
+                }
+                break;
+            case 1537239422:
+                if (key.equals("hide_ongoing")) {
+                    setHideOngoing(prefs.getBoolean("hide_ongoing", true));
+                    return;
+                }
+                return;
+            case 1734805931:
+                if (key.equals("expanded_duration_ms")) {
+                    setExpandedDurationMs(prefs.getInt("expanded_duration_ms", 4000));
+                    return;
+                }
+                return;
+            case 1940163494:
+                if (key.equals("sys_status_enabled")) {
+                    setSystemStatusEnabled(prefs.getBoolean("sys_status_enabled", true));
+                    return;
+                }
+                return;
+            default:
+                return;
+        }
+        setStatusFlags(loadStatusFlags());
+    }
+
+    public final void setAllAppsEnabled() {
+        putString("disabled_apps", "");
+    }
+
+    public final void setAppEnabled(String pkg, boolean enabled) {
+        Intrinsics.checkNotNullParameter(pkg, "pkg");
+        Set mutableSet = CollectionsKt.toMutableSet(getDisabledApps());
+        if (enabled) {
+            mutableSet.remove(pkg);
+        } else {
+            mutableSet.add(pkg);
+        }
+        putString("disabled_apps", StringUtils.joinToString(mutableSet, ","));
+    }
+
+    public final void setAppsDisabled(Collection<String> pkgs) {
+        Intrinsics.checkNotNullParameter(pkgs, "pkgs");
+        if (pkgs.isEmpty()) {
+            return;
+        }
+        Set mutableSet = CollectionsKt.toMutableSet(getDisabledApps());
+        mutableSet.addAll(pkgs);
+        putString("disabled_apps", StringUtils.joinToString(mutableSet, ","));
+    }
+
+    public final void setChannelEnabled(String pkg, String channelId, boolean enabled) {
+        Intrinsics.checkNotNullParameter(pkg, "pkg");
+        Intrinsics.checkNotNullParameter(channelId, "channelId");
+        String str = pkg + ":" + channelId;
+        Set mutableSet = CollectionsKt.toMutableSet(getDisabledChannels());
+        if (enabled) {
+            mutableSet.remove(str);
+        } else {
+            mutableSet.add(str);
+        }
+        putString("disabled_channels", StringUtils.joinToString(mutableSet, ","));
+    }
+
+    public final void updateAutoExpand(boolean value) {
+        putBoolean("auto_expand", value);
+    }
+
+    public final void updateAvoidCutout(boolean value) {
+        putBoolean("avoid_cutout", value);
+    }
+
+    public final void updateCompactHeightDp(int value) {
+        putInt("compact_height_dp", value);
+    }
+
+    public final void updateCompactWidthDp(int value) {
+        putInt("compact_width_dp", value);
+    }
+
+    public final void updateCornerRadiusDp(int value) {
+        putInt("corner_radius_dp", value);
+    }
+
+    public final void updateDebugLog(boolean value) {
+        putBoolean("debug_log", value);
+    }
+
+    public final void updateDisplayDurationMs(int value) {
+        putInt("display_duration_ms", value);
+    }
+
+    public final void updateExpandedDurationMs(int value) {
+        putInt("expanded_duration_ms", value);
+    }
+
+    public final void updateExpandedHeightDp(int value) {
+        putInt("expanded_height_dp", value);
+    }
+
+    public final void updateExpandedWidthDp(int value) {
+        putInt("expanded_width_dp", value);
+    }
+
+    public final void updateHideGroupSummary(boolean value) {
+        putBoolean("hide_group_summary", value);
+    }
+
+    public final void updateHideOngoing(boolean value) {
+        putBoolean("hide_ongoing", value);
+    }
+
+    public final void updateIslandAccentColor(int value) {
+        putInt("island_accent_color", value);
+    }
+
+    public final void updateIslandBgColor(int value) {
+        putInt("island_bg_color", value);
+    }
+
+    public final void updateMasterEnabled(boolean value) {
+        putBoolean("master_enabled", value);
+    }
+
+    public final void updateStatusFlag(String key, boolean value) {
+        Intrinsics.checkNotNullParameter(key, "key");
+        putBoolean(key, value);
+    }
+
+    public final void updateSysAppTakeover(boolean value) {
+        putBoolean("sys_app_takeover", value);
+    }
+
+    public final void updateSystemStatusEnabled(boolean value) {
+        putBoolean("sys_status_enabled", value);
+    }
+
+    public final void updateSystemStatusPersistent(boolean value) {
+        putBoolean("sys_status_persistent", value);
+    }
+
+    public final void updateYOffsetDp(int value) {
+        putInt("y_offset_dp", value);
+    }
+}

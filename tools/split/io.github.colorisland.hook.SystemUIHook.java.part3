@@ -1,0 +1,4 @@
+        hookHeadsUp(module, defaultClassLoader);
+        hookCapsule(module, defaultClassLoader);
+    }
+}

@@ -1,0 +1,71 @@
+        if (!IslandConfig.INSTANCE.getMasterEnabled() || !IslandConfig.INSTANCE.getHideSystemCapsule() || des == null) {
+            return false;
+        }
+        String str = des;
+        // 系统状态胶囊关键词：上岛后隐藏原生胶囊，避免与灵动岛重复（含通话类）
+        String[] keys = {"热点", "录屏", "屏幕录制", "手电筒", "闪光灯", "勿扰", "静音", "振动", "震动", "护眼", "阅读", "省电", "飞行", "蓝牙", "VPN", "NFC", "投屏", "投影", "深色", "夜间", "暗色", "流量", "定位", "游戏", "电竞", "性能", "内存", "清理", "加速", "扫描", "拦截", "应用锁", "儿童", "学生", "健康", "跨屏", "车机", "穿戴", "耳机", "截屏", "网络", "WiFi", "WLAN", "5G", "高清通话", "字幕", "无障碍", "朗读", "计时", "秒表", "闹钟", "电话", "来电", "通话", "拨打", "接听", "挂断", "回拨", "未接"};
+        for (String k : keys) {
+            if (StringUtils.contains(str, k)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public final boolean shouldSuppressSystemPeek(StatusBarNotification sbn) {
+        Intrinsics.checkNotNullParameter(sbn, "sbn");
+        if (IslandConfig.INSTANCE.getMasterEnabled() && IslandConfig.INSTANCE.getHideSystemCapsule()) {
+            return detectSystemStatusNotification(sbn) != null || isFlashlightNotification(sbn);
+        }
+        return false;
+    }
+
+    public final void showDispatched(final IslandNotification notif, final long timeoutMs) {
+        Intrinsics.checkNotNullParameter(notif, "notif");
+        mainHandler.post(new Runnable() { // from class: io.github.colorisland.island.IslandController$$ExternalSyntheticLambda25
+            @Override // java.lang.Runnable
+            public final void run() {
+                IslandController.showDispatched$lambda$39(notif, timeoutMs);
+            }
+        });
+    }
+
+    public final void showSystemStatus(final IslandSystemStatus status) {
+        Intrinsics.checkNotNullParameter(status, "status");
+        mainHandler.post(new Runnable() { // from class: io.github.colorisland.island.IslandController$$ExternalSyntheticLambda32
+            @Override // java.lang.Runnable
+            public final void run() {
+                IslandController.showSystemStatus$lambda$46(status);
+            }
+        });
+    }
+
+    public final void toggleExpand() {
+        boolean z = !expanded;
+        if (!z) {
+            mainHandler.removeCallbacks(collapseRunnable);
+        }
+        setExpanded(z);
+    }
+
+    public final void toggleSystemStatusAction(IslandSystemStatus.Type type) {
+        Intrinsics.checkNotNullParameter(type, "type");
+        int i = WhenMappings.$EnumSwitchMapping$0[type.ordinal()];
+        if (i == 1) {
+            toggleFlashlight();
+        } else {
+            if (i != 2) {
+                return;
+            }
+            toggleHotspot();
+        }
+    }
+
+    public final void updateConnInfo(String info) {
+        Intrinsics.checkNotNullParameter(info, "info");
+        IslandWindow islandWindow = window;
+        if (islandWindow != null) {
+            islandWindow.updateConnInfo(info);
+        }
+    }
+}
