@@ -468,7 +468,11 @@ public final class IslandController {
     }
 
     /* JADX INFO: Access modifiers changed from: private */
-    public static final void handlePosted$lambda$20$lambd
+    public static final void handlePosted$lambda$20$lambda$19(StatusBarNotification statusBarNotification, Notification notification, AppMeta appMeta) {
+        INSTANCE.handlePostedWithMeta(statusBarNotification, notification, appMeta);
+    }
+
+    /* JADX WARN: Removed duplicated region for block: B:15:0x003b  */
     /* JADX WARN: Removed duplicated region for block: B:18:0x0041  */
     /* JADX WARN: Removed duplicated region for block: B:9:0x0023  */
     /*
