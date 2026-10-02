@@ -39,7 +39,7 @@
     }
 
     /* JADX INFO: Access modifiers changed from: private */
-    private final void handle(Intent intent) {
+    public final void handle(Intent intent) {
         String action = intent.getAction();
         if (action != null) {
             int hashCode = action.hashCode();
