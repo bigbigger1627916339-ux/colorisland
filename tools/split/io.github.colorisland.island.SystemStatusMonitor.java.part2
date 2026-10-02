@@ -1,233 +1,105 @@
-                            }
-                        }
-                        SystemStatusMonitor.this.onFlashlightChanged(enabled);
-                    }
-                };
-                this.torchCallback = torchCallback;
-                try {
-                    m5221constructorimpl2 = KResult.success(findTorchCameraId(cameraManager));
-                } catch (Throwable th) {
-                    m5221constructorimpl2 = KResult.success(KResult.createFailure(th));
-                }
-                if (!KResult.isFailureimpl(m5221constructorimpl2)) {
-                    obj = m5221constructorimpl2;
-                }
-                this.torchCameraId = (String) obj;
-                IslandController.INSTANCE.setTorchCameraId(this.torchCameraId);
-                cameraManager.registerTorchCallback(torchCallback, new Handler(Looper.getMainLooper()));
-                Log.i(TAG, "torch callback registered, cameraId=" + this.torchCameraId);
-            }
-            m5221constructorimpl = KResult.success(Unit.INSTANCE);
-        } catch (Throwable th2) {
-            m5221constructorimpl = KResult.success(KResult.createFailure(th2));
-        }
-        Throwable m5224exceptionOrNullimpl = KResult.exceptionOrNullimpl(m5221constructorimpl);
-        if (m5224exceptionOrNullimpl != null) {
-            Log.e(TAG, "registerTorchCallback failed", m5224exceptionOrNullimpl);
-        }
-    }
-
-    private final void show(IslandSystemStatus.Type type, int iconRes, String title, String text, long durationMs) {
-        emitStatus$default(this, type, iconRes, title, text, durationMs, false, null, 64, null);
-    }
-
-    static /* synthetic */ void show$default(SystemStatusMonitor systemStatusMonitor, IslandSystemStatus.Type type, int i, String str, String str2, long j, int i2, Object obj) {
-        if ((i2 & 8) != 0) {
-            str2 = "";
-        }
-        String str3 = str2;
-        if ((i2 & 16) != 0) {
-            j = IslandSystemStatus.TRANSIENT_DURATION_MS;
-        }
-        systemStatusMonitor.show(type, i, str, str3, j);
-    }
-
-    private final void showPersistent(IslandSystemStatus.Type type, int iconRes, String title, boolean enabled, String connInfo) {
-        if (enabled) {
-            emitStatus(type, iconRes, title, "", IslandSystemStatus.TRANSIENT_DURATION_MS, true, connInfo);
-        } else if (IslandController.INSTANCE.isStatusShowing(type)) {
-            IslandController.INSTANCE.hideSystemStatusDelayed(this.CLOSE_HIDE_DELAY_MS);
-        }
-    }
-
-    static /* synthetic */ void showPersistent$default(SystemStatusMonitor systemStatusMonitor, IslandSystemStatus.Type type, int i, String str, boolean z, String str2, int i2, Object obj) {
-        if ((i2 & 16) != 0) {
-            str2 = "";
-        }
-        systemStatusMonitor.showPersistent(type, i, str, z, str2);
-    }
-
-    private final void showTransient(IslandSystemStatus.Type type, int iconRes, String title, String text, boolean enabled) {
-        if (!enabled) {
-            if (IslandController.INSTANCE.isStatusShowing(type)) {
-                IslandController.INSTANCE.hideSystemStatusDelayed(this.CLOSE_HIDE_DELAY_MS);
-            }
-        } else if (IslandConfig.INSTANCE.getSystemStatusPersistent()) {
-            showPersistent$default(this, type, iconRes, title, enabled, null, 16, null);
-        } else {
-            show(type, iconRes, title, text, IslandSystemStatus.TRANSIENT_DURATION_MS);
-        }
-    }
-
-    static /* synthetic */ void showTransient$default(SystemStatusMonitor systemStatusMonitor, IslandSystemStatus.Type type, int i, String str, String str2, boolean z, int i2, Object obj) {
-        if ((i2 & 8) != 0) {
-            str2 = "";
-        }
-        systemStatusMonitor.showTransient(type, i, str, str2, z);
-    }
-
-    private final void startConnRefresh() {
-        this.connHandler.removeCallbacks(this.connRefresh);
-        this.connHandler.postDelayed(this.connRefresh, this.CONN_REFRESH_MS);
-    }
-
-    private final String statusSourceLabel() {
-        Object m5221constructorimpl;
-        Context moduleContext = getModuleContext();
-        if (moduleContext != null) {
-            try {
-                SystemStatusMonitor systemStatusMonitor = this;
-                m5221constructorimpl = KResult.success(moduleContext.getString(R.string.island_status_source));
-            } catch (Throwable th) {
-                m5221constructorimpl = KResult.success(KResult.createFailure(th));
-            }
-            if (KResult.isFailureimpl(m5221constructorimpl)) {
-                m5221constructorimpl = null;
-            }
-            String str = (String) m5221constructorimpl;
-            if (str != null) {
+            if (bool != null && bool.booleanValue()) {
                 return str;
             }
+            i++;
         }
-        return "系统状态";
     }
 
-    private final void stopConnRefresh() {
-        this.connHandler.removeCallbacks(this.connRefresh);
+    private final Context getModuleContext() {
+        return (Context) this.moduleContext.getValue();
     }
 
-    public final void onFlashlightChanged(boolean enabled) {
-        if (Intrinsics.areEqual(this.lastFlashlight, Boolean.valueOf(enabled))) {
-            return;
-        }
-        this.lastFlashlight = Boolean.valueOf(enabled);
-        IslandController.INSTANCE.setFlashlightEnabled(enabled);
-        Log.i(TAG, "onFlashlightChanged -> " + enabled);
-        showTransient(IslandSystemStatus.Type.FLASHLIGHT, R.drawable.ic_status_flashlight, enabled ? "手电筒已开启" : "手电筒已关闭", "", enabled);
-    }
-
-    public final void onHotspotChanged$app_release(boolean enabled) {
-        if (Intrinsics.areEqual(this.lastApEnabled, Boolean.valueOf(enabled))) {
-            return;
-        }
-        this.lastApEnabled = Boolean.valueOf(enabled);
-        IslandController.INSTANCE.setHotspotEnabled(enabled);
-        if (enabled) {
-            startConnRefresh();
-        } else {
-            stopConnRefresh();
-        }
-        showPersistent(IslandSystemStatus.Type.HOTSPOT, R.drawable.ic_status_hotspot, enabled ? "个人热点已开启" : "个人热点已关闭", enabled, enabled ? readHotspotConnInfo() : "");
-    }
-
-    public final void onScreenRecordChanged(boolean recording) {
-        showPersistent$default(this, IslandSystemStatus.Type.SCREEN_RECORD, R.drawable.ic_status_record, recording ? "屏幕录制中" : "录屏已结束", recording, null, 16, null);
-    }
-
-    public final void register() {
-        Object m5221constructorimpl;
-        if (this.receiver != null) {
-            return;
-        }
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction("android.intent.action.BATTERY_CHANGED");
-        intentFilter.addAction("android.net.wifi.WIFI_AP_STATE_CHANGED");
-        intentFilter.addAction("oplus.intent.action.WIFI_AP_STATE_CHANGED");
-        BroadcastReceiver broadcastReceiver = new BroadcastReceiver() { // from class: io.github.colorisland.island.SystemStatusMonitor$register$r$1
-            @Override // android.content.BroadcastReceiver
-            public void onReceive(Context context, Intent intent) {
-                Object m5221constructorimpl2;
-                if (intent == null) {
+    /* JADX INFO: Access modifiers changed from: private */
+    private final void handle(Intent intent) {
+        String action = intent.getAction();
+        if (action != null) {
+            int hashCode = action.hashCode();
+            if (hashCode == -1538406691) {
+                if (action.equals("android.intent.action.BATTERY_CHANGED")) {
+                    handleBattery(intent);
                     return;
                 }
-                SystemStatusMonitor systemStatusMonitor = SystemStatusMonitor.this;
-                try {
-                    systemStatusMonitor.handle(intent);
-                    m5221constructorimpl2 = KResult.success(Unit.INSTANCE);
-                } catch (Throwable th) {
-                    m5221constructorimpl2 = KResult.success(KResult.createFailure(th));
-                }
-                Throwable m5224exceptionOrNullimpl = KResult.exceptionOrNullimpl(m5221constructorimpl2);
-                if (m5224exceptionOrNullimpl != null) {
-                    Log.e("ColorIslandStatus", "handle " + intent.getAction() + " failed", m5224exceptionOrNullimpl);
-                }
+                return;
             }
-        };
-        this.receiver = broadcastReceiver;
-        try {
-            SystemStatusMonitor systemStatusMonitor = this;
-            m5221constructorimpl = KResult.success(this.context.registerReceiver(broadcastReceiver, intentFilter, 4));
-        } catch (Throwable th) {
-            m5221constructorimpl = KResult.success(KResult.createFailure(th));
-        }
-        if (!KResult.isSuccessimpl(m5221constructorimpl)) {
-            this.receiver = null;
-            Log.e(TAG, "registerReceiver failed");
-        } else {
-            registerTorchCallback();
-            IslandController.INSTANCE.setStatusSink(new Function2() { // from class: io.github.colorisland.island.SystemStatusMonitor$$ExternalSyntheticLambda1
-                @Override // kotlin.jvm.functions.Function2
-                public final Object invoke(Object obj, Object obj2) {
-                    Unit register$lambda$9;
-                    register$lambda$9 = SystemStatusMonitor.register$lambda$9(SystemStatusMonitor.this, (IslandSystemStatus.Type) obj, ((Boolean) obj2).booleanValue());
-                    return register$lambda$9;
+            if (hashCode != 409953495) {
+                if (hashCode != 777190421 || !action.equals("oplus.intent.action.WIFI_AP_STATE_CHANGED")) {
+                    return;
                 }
-            });
-            Log.i(TAG, "SystemStatusMonitor registered");
+            } else if (!action.equals("android.net.wifi.WIFI_AP_STATE_CHANGED")) {
+                return;
+            }
+            handleHotspot(intent);
         }
     }
 
-    public final void unregister() {
-        Object m5221constructorimpl;
-        Object m5221constructorimpl2;
-        BroadcastReceiver broadcastReceiver = this.receiver;
-        if (broadcastReceiver == null) {
+    private final void handleBattery(Intent intent) {
+        int intExtra = intent.getIntExtra(NotificationCompat.CATEGORY_STATUS, -1);
+        boolean z = true;
+        boolean z2 = intExtra == 2 || intExtra == 5;
+        if (Intrinsics.areEqual(this.lastCharging, Boolean.valueOf(z2))) {
             return;
         }
-        Unit unit = null;
-        this.receiver = null;
+        Boolean bool = this.lastCharging;
+        this.lastCharging = Boolean.valueOf(z2);
+        if (bool != null && z2) {
+            int intExtra2 = intent.getIntExtra("level", -1);
+            if (!intent.getBooleanExtra("fastcharger_status", false) && !intent.getBooleanExtra("charge_fast_charge", false)) {
+                z = false;
+            }
+            showTransient(IslandSystemStatus.Type.CHARGING, R.drawable.ic_status_charging, intExtra == 5 ? "电池已充满" : z ? "正在超级闪充" : "正在充电", (intExtra2 < 0 || intExtra2 >= 101) ? "" : "当前电量 " + intExtra2 + "%", true);
+        }
+    }
+
+    private final void handleHotspot(Intent intent) {
+        int intExtra = intent.getIntExtra("wifi_state", 11);
+        Log.i(TAG, "handleHotspot action=" + intent.getAction() + " state=" + intExtra + " extras=" + intent.getExtras());
+        onHotspotChanged$app_release(intExtra == 13 || intExtra == 12);
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public static final Context moduleContext_delegate$lambda$2(SystemStatusMonitor systemStatusMonitor) {
+        Object m5221constructorimpl;
         try {
-            SystemStatusMonitor systemStatusMonitor = this;
-            this.context.unregisterReceiver(broadcastReceiver);
-            m5221constructorimpl = KResult.success(Unit.INSTANCE);
+            m5221constructorimpl = KResult.success(systemStatusMonitor.context.createPackageContext(IslandConfig.MODULE_PACKAGE, 3));
         } catch (Throwable th) {
             m5221constructorimpl = KResult.success(KResult.createFailure(th));
         }
         Throwable m5224exceptionOrNullimpl = KResult.exceptionOrNullimpl(m5221constructorimpl);
         if (m5224exceptionOrNullimpl != null) {
-            Log.w(TAG, "unregisterReceiver failed: " + m5224exceptionOrNullimpl.getMessage());
+            Log.e(TAG, "createPackageContext failed", m5224exceptionOrNullimpl);
         }
-        IslandController.INSTANCE.setStatusSink(null);
-        CameraManager.TorchCallback torchCallback = this.torchCallback;
-        if (torchCallback == null) {
-            return;
+        if (KResult.isFailureimpl(m5221constructorimpl)) {
+            m5221constructorimpl = null;
         }
-        this.torchCallback = null;
-        try {
-            SystemStatusMonitor systemStatusMonitor2 = this;
-            Object systemService = this.context.getSystemService("camera");
-            CameraManager cameraManager = systemService instanceof CameraManager ? (CameraManager) systemService : null;
-            if (cameraManager != null) {
-                cameraManager.unregisterTorchCallback(torchCallback);
-                unit = Unit.INSTANCE;
+        return (Context) m5221constructorimpl;
+    }
+
+    private final void onSystemStatusFromNotification(IslandSystemStatus.Type type, boolean enabled) {
+        Log.i(TAG, "onSystemStatusFromNotification type=" + type + " enabled=" + enabled);
+        int i = WhenMappings.$EnumSwitchMapping$0[type.ordinal()];
+        if (i == 1) {
+            onHotspotChanged$app_release(enabled);
+        } else if (i == 2) {
+            onScreenRecordChanged(enabled);
+        } else {
+            if (i != 3) {
+                return;
             }
-            m5221constructorimpl2 = KResult.success(unit);
-        } catch (Throwable th2) {
-            m5221constructorimpl2 = KResult.success(KResult.createFailure(th2));
-        }
-        Throwable m5224exceptionOrNullimpl2 = KResult.exceptionOrNullimpl(m5221constructorimpl2);
-        if (m5224exceptionOrNullimpl2 != null) {
-            Log.w(TAG, "unregisterTorchCallback failed: " + m5224exceptionOrNullimpl2.getMessage());
+            onFlashlightChanged(enabled);
         }
     }
-}
+
+    /* JADX INFO: Access modifiers changed from: private */
+    /* JADX WARN: Code restructure failed: missing block: B:104:0x02e8, code lost:
+    
+        if (r3.length() <= 0) goto L152;
+     */
+    /* JADX WARN: Code restructure failed: missing block: B:105:0x02ea, code lost:
+    
+        r3.append(" · ");
+     */
+    /* JADX WARN: Code restructure failed: missing block: B:106:0x02ed, code lost:
+    
+        r3.append("已连接 " + r14 + " 台");
+     */
+    /* JADX WARN: Multi-variable type inference failed */
