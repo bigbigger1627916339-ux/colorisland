@@ -10,12 +10,14 @@ import org.json.JSONObject
  * 由 Hook 在 SystemUI 进程写入，经 ConfigSyncApp 同步到本进程。
  *
  * JSON 结构：
+ * ```json
  * {
  *   "com.tencent.mm": [
  *     {"id": "message", "name": "消息", "count": 12},
  *     {"id": "subscribe", "name": "订阅号", "count": 3}
  *   ]
  * }
+ * ```
  *
  * 容错策略（与 v1.0 行为对齐）：
  * - raw 为空/空白 → 空 Map；
