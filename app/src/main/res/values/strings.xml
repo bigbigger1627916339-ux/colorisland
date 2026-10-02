@@ -33,8 +33,8 @@
     <string name="color_preset_green">苹果绿</string>
     <string name="color_preset_orange">橙色</string>
     <string name="color_preset_pink">粉色</string>
-    <string name="color_preset_purple">紫色</string>
     <string name="color_preset_pure_black">纯黑</string>
+    <string name="color_preset_purple">紫色</string>
     <string name="color_preset_space_black">深空黑</string>
     <string name="color_preset_system_gray">系统灰</string>
     <string name="color_preset_white">白色</string>

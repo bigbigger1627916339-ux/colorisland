@@ -167,7 +167,7 @@ fun HomePage(
 
         // ---- 工具 ----
         item {
-            SectionTitle(stringResource(R.string.tools_section_title))
+            SectionTitle(stringResource(R.string.suggestions_available))
             SettingsCard {
                 PreferenceAction(
                     title = stringResource(R.string.test_island),
