@@ -21,6 +21,25 @@ ColorOS 14 灵动岛 Xposed 模块 —— 自绘悬浮岛 + AOSP 通知 Hook，M
 
 ## 构建
 
+**首次构建前必须先还原源码。** 仓库中 5 个较大的源码文件受单文件上传体积限制，以分片形式存放在
+`tools/split/` 目录，需先用组装脚本生成到 `app/src/main/java/`：
+
+```bash
+python3 tools/assemble.py           # 写入缺失/过期的源码文件
+python3 tools/assemble.py --check   # 只校验一致性，不写入任何文件
+python3 tools/assemble.py --force   # 强制重写全部源码文件
+```
+
+受此影响的文件（其余源码均为普通文件，无需处理）：
+
+- `io/github/colorisland/data/PrefsRepository.java`
+- `io/github/colorisland/hook/SystemUIHook.java`
+- `io/github/colorisland/island/IslandController.java`
+- `io/github/colorisland/island/IslandView.java`
+- `io/github/colorisland/island/SystemStatusMonitor.java`
+
+还原完成后即可正常构建：
+
 ```bash
 # 方式一：一键脚本（versionCode 自动递增）
 ./build.sh
@@ -39,9 +58,10 @@ gradle assembleRelease
 app/src/main/
 ├── java/io/github/colorisland/
 │   ├── ColorIslandModule.java      # Xposed 模块入口
-│   ├── hook/SystemUIHook.java      # SystemUI Hook 逻辑
+│   ├── hook/SystemUIHook.java      # SystemUI Hook 逻辑（由 tools/split 分片组装）
 │   ├── dispatch/                   # 跨进程岛消息分发（Contract/Dispatcher/Request）
 │   ├── data/                       # 数据层（AppsRepository / PrefsRepository）
+│   ├── island/                     # 灵动岛核心（Controller / View / SystemStatusMonitor）
 │   ├── ui/                         # Compose UI（theme / page / component）
 │   └── MainActivity.kt             # 设置界面入口
 ├── res/
@@ -49,6 +69,10 @@ app/src/main/
 │   ├── mipmap-anydpi-v26/          # Adaptive Icon 入口
 │   └── values/                     # strings / themes
 └── resources/META-INF/xposed/      # Xposed 模块元数据（module.prop / scope.list）
+
+tools/
+├── split/                          # 大文件分片（<扁平类名>.partN，按序拼接即还原）
+└── assemble.py                     # 分片 → app/src/main/java 组装脚本
 ```
 
 ## 依赖
